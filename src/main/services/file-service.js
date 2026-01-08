@@ -308,6 +308,14 @@ class FileService {
   }
 
   /**
+   * Generate a unique ID
+   * @returns {string} UUID
+   */
+  generateId() {
+    return uuidv4();
+  }
+
+  /**
    * Create a new note
    * @param {Object} noteData - Note data
    * @returns {Promise<Object>} Created note
@@ -389,6 +397,52 @@ class FileService {
       await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
     } catch (error) {
       throw new Error('WRITE_ERROR');
+    }
+  }
+
+  // ==================== Project Folder Operations ====================
+
+  /**
+   * Create a project folder
+   * @param {string} folderName - Project folder name (slugified)
+   */
+  async createProjectFolder(folderName) {
+    const notesDir = path.join(this.storageRoot, 'notes', folderName);
+    try {
+      await this.ensureDirectoryExists(notesDir);
+    } catch (error) {
+      throw new Error('FOLDER_CREATE_ERROR');
+    }
+  }
+
+  /**
+   * Rename a project folder
+   * @param {string} oldName - Old folder name
+   * @param {string} newName - New folder name
+   */
+  async renameProjectFolder(oldName, newName) {
+    const oldPath = path.join(this.storageRoot, 'notes', oldName);
+    const newPath = path.join(this.storageRoot, 'notes', newName);
+    try {
+      await fs.rename(oldPath, newPath);
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        throw new Error('FOLDER_NOT_FOUND');
+      }
+      throw new Error('FOLDER_RENAME_ERROR');
+    }
+  }
+
+  /**
+   * Delete a project folder and all its contents
+   * @param {string} folderName - Project folder name
+   */
+  async deleteProjectFolder(folderName) {
+    const folderPath = path.join(this.storageRoot, 'notes', folderName);
+    try {
+      await fs.rm(folderPath, { recursive: true, force: true });
+    } catch (error) {
+      throw new Error('FOLDER_DELETE_ERROR');
     }
   }
 }

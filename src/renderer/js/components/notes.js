@@ -10,12 +10,15 @@ export class NotesComponent {
   constructor() {
     this.container = null;
     this.notes = [];
+    this.projects = [];
     this.currentNote = null;
+    this.selectedProjectId = null;
     this.isEditing = false;
     this.autoSaveTimer = null;
     this.hasUnsavedChanges = false;
     this.sortBy = 'modifiedAt';
     this.sortOrder = 'desc';
+    this.preloadCache = new Map(); // Cache for preloaded notes
   }
 
   /**
@@ -38,6 +41,9 @@ export class NotesComponent {
         </div>
         
         <div class="notes-controls">
+          <select id="project-filter" class="project-filter">
+            <option value="">All Projects</option>
+          </select>
           <select id="sort-select" class="sort-select">
             <option value="modifiedAt-desc">Recent</option>
             <option value="modifiedAt-asc">Oldest</option>
@@ -63,6 +69,11 @@ export class NotesComponent {
               placeholder="Note title"
               maxlength="200"
             />
+            <div class="editor-metadata">
+              <select id="note-project" class="note-project-select">
+                <option value="">No Project</option>
+              </select>
+            </div>
             <div class="editor-actions">
               <button type="button" class="btn-secondary" id="toggle-preview-btn">
                 Preview
@@ -100,6 +111,7 @@ export class NotesComponent {
     `;
 
     container.appendChild(notesView);
+    await this.loadProjects();
     await this.loadNotes();
     this.attachEventListeners();
   }
@@ -110,6 +122,7 @@ export class NotesComponent {
   async loadNotes() {
     try {
       const result = await window.knowledgeBase.invoke('notes.list', {
+        projectId: this.selectedProjectId,
         sortBy: this.sortBy,
         sortOrder: this.sortOrder,
       });
@@ -122,6 +135,44 @@ export class NotesComponent {
       }
     } catch (error) {
       this.showError('Error loading notes: ' + error.message);
+    }
+  }
+
+  /**
+   * Load available projects for filtering
+   */
+  async loadProjects() {
+    try {
+      const result = await window.knowledgeBase.invoke('projects.list');
+      if (result.success) {
+        this.projects = result.data;
+        this.renderProjectDropdowns();
+      }
+    } catch (error) {
+      console.error('Error loading projects:', error);
+    }
+  }
+
+  /**
+   * Render project dropdowns
+   */
+  renderProjectDropdowns() {
+    // Filter dropdown
+    const filterSelect = document.getElementById('project-filter');
+    if (filterSelect) {
+      const currentValue = filterSelect.value;
+      filterSelect.innerHTML = '<option value="">All Projects</option>' +
+        this.projects.map(p => `<option value="${p.id}">${this.escapeHtml(p.name)}</option>`).join('');
+      filterSelect.value = currentValue;
+    }
+
+    // Note project dropdown
+    const noteProjectSelect = document.getElementById('note-project');
+    if (noteProjectSelect) {
+      const currentValue = noteProjectSelect.value;
+      noteProjectSelect.innerHTML = '<option value="">No Project</option>' +
+        this.projects.map(p => `<option value="${p.id}">${this.escapeHtml(p.name)}</option>`).join('');
+      noteProjectSelect.value = currentValue;
     }
   }
 
@@ -167,9 +218,18 @@ export class NotesComponent {
     const saveBtn = document.getElementById('save-note-btn');
     const deleteBtn = document.getElementById('delete-note-btn');
     const togglePreviewBtn = document.getElementById('toggle-preview-btn');
+    const projectFilter = document.getElementById('project-filter');
+    const noteProjectSelect = document.getElementById('note-project');
 
     if (newNoteBtn) {
       newNoteBtn.addEventListener('click', () => this.createNewNote());
+    }
+
+    if (projectFilter) {
+      projectFilter.addEventListener('change', (e) => {
+        this.selectedProjectId = e.target.value || null;
+        this.loadNotes();
+      });
     }
 
     if (sortSelect) {
@@ -179,6 +239,10 @@ export class NotesComponent {
         this.sortOrder = sortOrder;
         this.loadNotes();
       });
+    }
+
+    if (noteProjectSelect) {
+      noteProjectSelect.addEventListener('change', () => this.onContentChange());
     }
 
     if (titleInput) {
@@ -244,7 +308,14 @@ export class NotesComponent {
     }
 
     try {
-      const result = await window.knowledgeBase.invoke('notes.get', noteId);
+      // Check if note is in preload cache
+      let result;
+      if (this.preloadCache.has(noteId)) {
+        result = { success: true, data: this.preloadCache.get(noteId) };
+        this.preloadCache.delete(noteId); // Remove from cache after use
+      } else {
+        result = await window.knowledgeBase.invoke('notes.get', noteId);
+      }
 
       if (result.success) {
         this.currentNote = result.data;
@@ -257,17 +328,48 @@ export class NotesComponent {
         // Populate inputs
         const titleInput = document.getElementById('note-title');
         const contentTextarea = document.getElementById('note-content');
+        const noteProjectSelect = document.getElementById('note-project');
 
         if (titleInput) titleInput.value = this.currentNote.title;
         if (contentTextarea) contentTextarea.value = this.currentNote.content;
+        if (noteProjectSelect) noteProjectSelect.value = this.currentNote.projectId || '';
 
         this.updateSaveButton();
         this.renderNotesList(); // Update active state
+
+        // Preload linked notes for instant navigation
+        this.preloadLinkedNotes(this.currentNote.content);
       } else {
         this.showError('Failed to load note: ' + result.error);
       }
     } catch (error) {
       this.showError('Error loading note: ' + error.message);
+    }
+  }
+
+  /**
+   * Preload notes referenced in the current note for instant navigation
+   * @param {string} content - Note content
+   */
+  async preloadLinkedNotes(content) {
+    const linkedTitles = markdownService.extractInternalLinks(content);
+    
+    // Find notes with matching titles
+    const linkedNotes = this.notes.filter(n => linkedTitles.includes(n.title));
+    
+    // Preload up to 5 linked notes
+    const toPreload = linkedNotes.slice(0, 5);
+    
+    for (const noteMetadata of toPreload) {
+      try {
+        const result = await window.knowledgeBase.invoke('notes.get', noteMetadata.id);
+        if (result.success) {
+          this.preloadCache.set(noteMetadata.id, result.data);
+        }
+      } catch (error) {
+        // Silently fail preloading
+        console.debug('Failed to preload note:', noteMetadata.id);
+      }
     }
   }
 
@@ -297,11 +399,13 @@ export class NotesComponent {
   async saveNote(isAutoSave = false) {
     const titleInput = document.getElementById('note-title');
     const contentTextarea = document.getElementById('note-content');
+    const noteProjectSelect = document.getElementById('note-project');
 
     if (!titleInput || !contentTextarea) return;
 
     const title = titleInput.value.trim();
     const content = contentTextarea.value;
+    const projectId = noteProjectSelect?.value || null;
 
     // Validate title
     if (!title) {
@@ -323,13 +427,14 @@ export class NotesComponent {
         // Update existing note
         result = await window.knowledgeBase.invoke('notes.update', {
           id: this.currentNote.id,
-          updates: { title, content },
+          updates: { title, content, projectId },
         });
       } else {
         // Create new note
         result = await window.knowledgeBase.invoke('notes.create', {
           title,
           content,
+          projectId,
         });
       }
 
@@ -403,11 +508,23 @@ export class NotesComponent {
       previewDiv.style.display = 'block';
       toggleBtn.textContent = 'Edit';
 
-      // Add click handler for internal links
+      // Validate internal links and style broken ones
+      const { broken } = markdownService.validateInternalLinks(content, this.notes);
+      
+      // Add click handler for internal links and mark broken ones
       previewDiv.querySelectorAll('a[href^="internal://"]').forEach(link => {
+        const title = decodeURIComponent(link.getAttribute('href').replace('internal://', ''));
+        
+        // Mark broken links
+        if (broken.includes(title)) {
+          link.classList.add('broken-link');
+          link.title = `Note "${title}" not found`;
+        } else {
+          link.classList.add('internal-link');
+        }
+        
         link.addEventListener('click', (e) => {
           e.preventDefault();
-          const title = decodeURIComponent(link.getAttribute('href').replace('internal://', ''));
           this.navigateToNoteByTitle(title);
         });
       });

@@ -241,8 +241,12 @@
 .notes-controls {
   padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
+.project-filter,
 .sort-select {
   width: 100%;
   padding: 0.5rem;
@@ -343,10 +347,12 @@
   gap: 1rem;
   align-items: center;
   background: var(--color-surface);
+  flex-wrap: wrap;
 }
 
 .note-title-input {
   flex: 1;
+  min-width: 200px;
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: 6px;
@@ -357,6 +363,27 @@
 }
 
 .note-title-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.editor-metadata {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.note-project-select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.note-project-select:focus {
   outline: none;
   border-color: var(--color-accent);
 }
@@ -485,6 +512,34 @@
   text-decoration: underline;
 }
 
+/* Internal link styling */
+.note-preview a.internal-link {
+  color: var(--color-accent);
+  background: rgba(100, 149, 237, 0.1);
+  padding: 0.125rem 0.25rem;
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.note-preview a.internal-link:hover {
+  background: rgba(100, 149, 237, 0.2);
+}
+
+/* Broken link styling */
+.note-preview a.broken-link {
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.1);
+  padding: 0.125rem 0.25rem;
+  border-radius: 3px;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+.note-preview a.broken-link:hover {
+  background: rgba(220, 38, 38, 0.2);
+  text-decoration: line-through;
+}
+
 .note-preview blockquote {
   border-left: 4px solid var(--color-border);
   padding-left: 1rem;
@@ -535,4 +590,514 @@
 .feedback-message.error {
   background: #dc3545;
   color: white;
+}
+
+/* ==================== Todos Pinned Panel ==================== */
+
+#todos-panel-container {
+  width: 100%;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.todos-panel {
+  width: 100%;
+  max-height: 300px;
+  background: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  transition: max-height 0.3s ease;
+}
+
+.todos-panel.collapsed {
+  max-height: 3rem;
+  overflow: hidden;
+}
+
+.todos-header {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--color-surface-alt);
+  cursor: pointer;
+}
+
+.todos-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.todos-header-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.btn-icon-small {
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: opacity 0.2s;
+}
+
+.btn-icon-small:hover {
+  opacity: 0.9;
+}
+
+.btn-small {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.todos-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  padding: 1rem;
+  max-height: 250px;
+}
+
+.todos-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+  display: flex;
+  gap: 0.75rem;
+  padding: 0;
+}
+
+.todo-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  min-width: 250px;
+  max-width: 300px;
+  margin-bottom: 0.5rem;
+  background: var(--color-surface-alt);
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.todo-item:hover {
+  background: var(--color-border);
+}
+
+.todo-item.completed {
+  opacity: 0.6;
+}
+
+.todo-checkbox {
+  margin-top: 0.25rem;
+  cursor: pointer;
+}
+
+.todo-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.todo-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  word-wrap: break-word;
+}
+
+.todo-title.strikethrough {
+  text-decoration: line-through;
+}
+
+.todo-priority {
+  display: inline-block;
+  padding: 0.125rem 0.375rem;
+  border-radius: 3px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-left: 0.25rem;
+}
+
+.todo-priority.priority-high {
+  background: #dc3545;
+  color: white;
+}
+
+.todo-priority.priority-medium {
+  background: #ffc107;
+  color: #333;
+}
+
+.todo-priority.priority-low {
+  background: #6c757d;
+  color: white;
+}
+
+.todo-deadline {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+.btn-icon-tiny {
+  background: transparent;
+  border: none;
+  color: var(--color-muted);
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.btn-icon-tiny:hover {
+  color: #dc3545;
+}
+
+.todos-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+
+.todo-form {
+  padding: 0.75rem;
+  border-left: 1px solid var(--color-border);
+  background: var(--color-surface);
+  min-width: 300px;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+}
+
+.todo-form input[type="text"],
+.todo-form textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+}
+
+.todo-form textarea {
+  resize: vertical;
+  min-height: 3rem;
+}
+
+.todo-form-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.todo-form-controls select,
+.todo-form-controls input[type="datetime-local"] {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.todo-form-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+/* ==================== Projects Component ==================== */
+
+.projects-container {
+  display: flex;
+  height: 100%;
+  gap: 1.5rem;
+}
+
+.projects-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--color-border);
+  padding-right: 1.5rem;
+}
+
+.projects-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.projects-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.projects-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.project-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.project-item:hover {
+  background: var(--color-surface-alt);
+  border-color: var(--color-accent);
+}
+
+.project-item.selected {
+  background: var(--color-accent);
+  color: white;
+  border-color: var(--color-accent);
+}
+
+.project-item.selected .project-description {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.project-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.project-name {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.project-description {
+  font-size: 0.875rem;
+  color: var(--color-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-delete-project {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.project-item:hover .btn-delete-project {
+  opacity: 1;
+}
+
+.projects-main {
+  flex: 1;
+  overflow-y: auto;
+  padding-left: 1.5rem;
+}
+
+.projects-welcome {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.projects-welcome h3 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.projects-welcome p {
+  color: var(--color-muted);
+  font-size: 1.125rem;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.project-detail {
+  padding: 1rem 0;
+}
+
+.project-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.project-detail-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.project-detail-description {
+  color: var(--color-muted);
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+.project-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.project-notes {
+  margin-top: 2rem;
+}
+
+.project-notes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.project-notes-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+/* Reuse existing note-item styles from notes component */
+.project-detail .note-item {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.project-detail .note-item:hover {
+  background-color: var(--color-surface-alt);
+}
+
+/* ==================== Modal Dialog ==================== */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--color-muted);
+  cursor: pointer;
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.modal-close:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 0.875rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: inherit;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
 }

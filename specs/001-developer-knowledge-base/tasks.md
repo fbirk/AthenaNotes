@@ -119,18 +119,18 @@ All paths are relative to repository root `C:\Users\BirkF\source\repos\Knowledge
 
 ### Implementation for User Story 3
 
-- [ ] T047 [P] [US3] Create Todo entity IPC handlers in src/main/main.js (todos.list, todos.create, todos.update, todos.toggleComplete, todos.delete)
-- [ ] T048 [P] [US3] Implement todos JSON storage operations in src/main/services/file-service.js (read/write todos.json)
-- [ ] T049 [US3] Create todos UI component in src/renderer/js/components/todos.js
-- [ ] T050 [US3] Implement pinned panel with fixed positioning in src/renderer/styles/components.css
-- [ ] T051 [US3] Implement todo CRUD UI (create, complete, delete) in todos component
-- [ ] T052 [US3] Add priority selection UI (high, medium, low) in todos component
-- [ ] T053 [US3] Add deadline picker in todos component
-- [ ] T054 [US3] Implement sorting logic (priority first, then deadline) in todos component
-- [ ] T055 [US3] Add collapse/expand toggle for pinned panel in todos component
-- [ ] T056 [US3] Persist collapsed state to localStorage in todos component
-- [ ] T057 [US3] Add keyboard shortcut (Ctrl+T) to toggle todos panel in src/renderer/js/app.js
-- [ ] T058 [US3] Style completed todos with strikethrough in src/renderer/styles/components.css
+- [x] T047 [P] [US3] Create Todo entity IPC handlers in src/main/main.js (todos.list, todos.create, todos.update, todos.toggleComplete, todos.delete)
+- [x] T048 [P] [US3] Implement todos JSON storage operations in src/main/services/file-service.js (read/write todos.json)
+- [x] T049 [US3] Create todos UI component in src/renderer/js/components/todos.js
+- [x] T050 [US3] Implement pinned panel with fixed positioning in src/renderer/styles/components.css
+- [x] T051 [US3] Implement todo CRUD UI (create, complete, delete) in todos component
+- [x] T052 [US3] Add priority selection UI (high, medium, low) in todos component
+- [x] T053 [US3] Add deadline picker in todos component
+- [x] T054 [US3] Implement sorting logic (priority first, then deadline) in todos component
+- [x] T055 [US3] Add collapse/expand toggle for pinned panel in todos component
+- [x] T056 [US3] Persist collapsed state to localStorage in todos component
+- [x] T057 [US3] Add keyboard shortcut (Ctrl+T) to toggle todos panel in src/renderer/js/app.js
+- [x] T058 [US3] Style completed todos with strikethrough in src/renderer/styles/components.css
 
 **Checkpoint**: Todo panel is functional, pinned, and always visible - task tracking complete
 
@@ -144,17 +144,17 @@ All paths are relative to repository root `C:\Users\BirkF\source\repos\Knowledge
 
 ### Implementation for User Story 4
 
-- [ ] T059 [P] [US4] Create Project entity IPC handlers in src/main/main.js (projects.list, projects.get, projects.create, projects.update, projects.delete)
-- [ ] T060 [P] [US4] Implement projects JSON storage operations in src/main/services/file-service.js (read/write projects.json)
-- [ ] T061 [US4] Create projects UI component in src/renderer/js/components/projects.js
-- [ ] T062 [US4] Implement project list view in projects component
-- [ ] T063 [US4] Add project creation UI (name, description) in projects component
-- [ ] T064 [US4] Implement project folder creation in file-service.js (create notes/project-name/)
-- [ ] T065 [US4] Add project selection dropdown in notes component for associating notes
-- [ ] T066 [US4] Implement project filtering in notes list view (filter by projectId)
-- [ ] T067 [US4] Add project detail view showing associated notes in projects component
-- [ ] T068 [US4] Implement project deletion with cascade options (delete or unlink notes) in projects component
-- [ ] T069 [US4] Update todos component to support project-todo linking (optional projectId)
+- [x] T059 [P] [US4] Create Project entity IPC handlers in src/main/main.js (projects.list, projects.get, projects.create, projects.update, projects.delete)
+- [x] T060 [P] [US4] Implement projects JSON storage operations in src/main/services/file-service.js (read/write projects.json)
+- [x] T061 [US4] Create projects UI component in src/renderer/js/components/projects.js
+- [x] T062 [US4] Implement project list view in projects component
+- [x] T063 [US4] Add project creation UI (name, description) in projects component
+- [x] T064 [US4] Implement project folder creation in file-service.js (create notes/project-name/)
+- [x] T065 [US4] Add project selection dropdown in notes component for associating notes
+- [x] T066 [US4] Implement project filtering in notes list view (filter by projectId)
+- [x] T067 [US4] Add project detail view showing associated notes in projects component
+- [x] T068 [US4] Implement project deletion with cascade options (delete or unlink notes) in projects component
+- [x] T069 [US4] Update todos component to support project-todo linking (optional projectId)
 
 **Checkpoint**: Projects enable note organization - multi-project workflow enabled
 
@@ -168,14 +168,14 @@ All paths are relative to repository root `C:\Users\BirkF\source\repos\Knowledge
 
 ### Implementation for User Story 5
 
-- [ ] T070 [US5] Implement [[Title]] link parsing in markdown.js (detect internal links in markdown)
-- [ ] T071 [US5] Add link resolution logic in markdown.js (convert [[Title]] to note ID)
-- [ ] T072 [US5] Implement click handler for internal links in notes component
-- [ ] T073 [US5] Add navigation to referenced note (< 1s per SC-005) in notes component
-- [ ] T074 [US5] Implement broken link detection in markdown.js (check if target note exists)
-- [ ] T075 [US5] Style broken links differently (red/strikethrough) in src/renderer/styles/components.css
-- [ ] T076 [US5] Implement note preloading for instant navigation in notes component
-- [ ] T077 [US5] Track referencing notes when deleting (return referencingNotes in notes.delete)
+- [x] T070 [US5] Implement [[Title]] link parsing in markdown.js (detect internal links in markdown)
+- [x] T071 [US5] Add link resolution logic in markdown.js (convert [[Title]] to note ID)
+- [x] T072 [US5] Implement click handler for internal links in notes component
+- [x] T073 [US5] Add navigation to referenced note (< 1s per SC-005) in notes component
+- [x] T074 [US5] Implement broken link detection in markdown.js (check if target note exists)
+- [x] T075 [US5] Style broken links differently (red/strikethrough) in src/renderer/styles/components.css
+- [x] T076 [US5] Implement note preloading for instant navigation in notes component
+- [x] T077 [US5] Track referencing notes when deleting (return referencingNotes in notes.delete)
 
 **Checkpoint**: Notes can reference each other - knowledge graph navigation works
 

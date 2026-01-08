@@ -1,8 +1,10 @@
 import { initRouter } from './router.js';
 import { createAppState } from './state.js';
+import { TodosComponent } from './components/todos.js';
 
 const state = createAppState();
 let isInitialized = false;
+let todosComponent = null;
 
 /**
  * Check if the application is initialized (has configuration)
@@ -59,6 +61,12 @@ export async function bootstrap() {
   } else {
     // Mount navigation for initialized app
     mountNavigation();
+    
+    // Mount todos panel
+    mountTodosPanel();
+    
+    // Setup keyboard shortcuts
+    setupKeyboardShortcuts();
   }
 
   // Initialize router
@@ -68,6 +76,39 @@ export async function bootstrap() {
   window.addEventListener('setup-complete', async () => {
     isInitialized = true;
     mountNavigation();
+    mountTodosPanel();
+    setupKeyboardShortcuts();
+  });
+}
+
+/**
+ * Mount the todos panel
+ */
+function mountTodosPanel() {
+  const container = document.getElementById('todos-panel-container');
+  if (!container) return;
+
+  // Remove existing panel if any
+  container.innerHTML = '';
+
+  // Create and mount new panel
+  todosComponent = new TodosComponent();
+  const panel = todosComponent.renderPinnedPanel();
+  container.appendChild(panel);
+}
+
+/**
+ * Setup keyboard shortcuts
+ */
+function setupKeyboardShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    // Ctrl+T: Toggle todos panel
+    if (e.ctrlKey && e.key === 't') {
+      e.preventDefault();
+      if (todosComponent) {
+        todosComponent.togglePanel();
+      }
+    }
   });
 }
 

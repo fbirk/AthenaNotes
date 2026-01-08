@@ -1,5 +1,6 @@
 import { SetupComponent } from './components/setup.js';
 import { NotesComponent } from './components/notes.js';
+import { ProjectsComponent } from './components/projects.js';
 
 // Store active component instance
 let activeComponent = null;
@@ -16,12 +17,17 @@ const routes = new Map([
     return notesComponent;
   }],
   ['#/todos', () => '<div class="placeholder-panel">Todos UI coming soon.</div>'],
-  ['#/projects', () => '<div class="placeholder-panel">Projects UI coming soon.</div>'],
+  ['#/projects', async (container) => {
+    const projectsComponent = new ProjectsComponent();
+    container.innerHTML = await projectsComponent.render();
+    projectsComponent.setupEventListeners();
+    return projectsComponent;
+  }],
   ['#/snippets', () => '<div class="placeholder-panel">Snippets UI coming soon.</div>'],
   ['#/tools', () => '<div class="placeholder-panel">Tools UI coming soon.</div>'],
 ]);
 
-function renderRoute(state) {
+async function renderRoute(state) {
   const view = document.getElementById('view');
   if (!view) {
     return;
@@ -39,7 +45,7 @@ function renderRoute(state) {
   const routeHandler = routes.get(hash) ?? (() => '<div class="placeholder-panel">Coming soon.</div>');
   
   // Check if route returns a component or HTML string
-  const result = routeHandler(view, state);
+  const result = await routeHandler(view, state);
   
   if (typeof result === 'string') {
     view.innerHTML = result;

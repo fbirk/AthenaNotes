@@ -298,4 +298,290 @@ function setupIpcHandlers() {
       return { success: false, error: error.message };
     }
   });
+
+  // Todos API
+  ipcMain.handle('todos.list', async () => {
+    try {
+      const data = await fileService.readJSON('todos.json');
+      const todos = data?.todos || [];
+
+      // Sort by priority (high, medium, low) then by deadline
+      const priorityOrder = { high: 0, medium: 1, low: 2 };
+      todos.sort((a, b) => {
+        if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
+          return priorityOrder[a.priority] - priorityOrder[b.priority];
+        }
+        if (a.deadline && b.deadline) {
+          return new Date(a.deadline) - new Date(b.deadline);
+        }
+        if (a.deadline) return -1;
+        if (b.deadline) return 1;
+        return 0;
+      });
+
+      return { success: true, data: todos };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('todos.create', async (_event, todoData) => {
+    try {
+      const data = await fileService.readJSON('todos.json') || { todos: [] };
+      const now = new Date().toISOString();
+
+      const newTodo = {
+        id: fileService.generateId(),
+        title: todoData.title,
+        description: todoData.description || '',
+        priority: todoData.priority || 'medium',
+        deadline: todoData.deadline || null,
+        completed: false,
+        completedAt: null,
+        projectId: todoData.projectId || null,
+        createdAt: now,
+        modifiedAt: now,
+      };
+
+      data.todos.push(newTodo);
+      await fileService.writeJSON('todos.json', data);
+
+      return { success: true, data: newTodo };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('todos.update', async (_event, { id, updates }) => {
+    try {
+      const data = await fileService.readJSON('todos.json');
+      if (!data || !data.todos) {
+        return { success: false, error: 'TODO_NOT_FOUND' };
+      }
+
+      const todoIndex = data.todos.findIndex(t => t.id === id);
+      if (todoIndex === -1) {
+        return { success: false, error: 'TODO_NOT_FOUND' };
+      }
+
+      data.todos[todoIndex] = {
+        ...data.todos[todoIndex],
+        ...updates,
+        modifiedAt: new Date().toISOString(),
+      };
+
+      await fileService.writeJSON('todos.json', data);
+
+      return { success: true, data: data.todos[todoIndex] };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('todos.toggleComplete', async (_event, id) => {
+    try {
+      const data = await fileService.readJSON('todos.json');
+      if (!data || !data.todos) {
+        return { success: false, error: 'TODO_NOT_FOUND' };
+      }
+
+      const todoIndex = data.todos.findIndex(t => t.id === id);
+      if (todoIndex === -1) {
+        return { success: false, error: 'TODO_NOT_FOUND' };
+      }
+
+      const todo = data.todos[todoIndex];
+      todo.completed = !todo.completed;
+      todo.completedAt = todo.completed ? new Date().toISOString() : null;
+      todo.modifiedAt = new Date().toISOString();
+
+      await fileService.writeJSON('todos.json', data);
+
+      return { success: true, data: todo };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('todos.delete', async (_event, id) => {
+    try {
+      const data = await fileService.readJSON('todos.json');
+      if (!data || !data.todos) {
+        return { success: false, error: 'TODO_NOT_FOUND' };
+      }
+
+      const todoIndex = data.todos.findIndex(t => t.id === id);
+      if (todoIndex === -1) {
+        return { success: false, error: 'TODO_NOT_FOUND' };
+      }
+
+      data.todos.splice(todoIndex, 1);
+      await fileService.writeJSON('todos.json', data);
+
+      return { success: true, data: { deleted: true } };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  // Projects API
+  ipcMain.handle('projects.list', async () => {
+    try {
+      const data = await fileService.readJSON('projects.json');
+      const projects = data?.projects || [];
+
+      // Sort by name
+      projects.sort((a, b) => a.name.localeCompare(b.name));
+
+      return { success: true, data: projects };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('projects.get', async (_event, id) => {
+    try {
+      const data = await fileService.readJSON('projects.json');
+      if (!data || !data.projects) {
+        return { success: false, error: 'PROJECT_NOT_FOUND' };
+      }
+
+      const project = data.projects.find(p => p.id === id);
+      if (!project) {
+        return { success: false, error: 'PROJECT_NOT_FOUND' };
+      }
+
+      // Get associated notes
+      const notes = await fileService.listNotes(project.folder);
+
+      return {
+        success: true,
+        data: {
+          ...project,
+          notes,
+        },
+      };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('projects.create', async (_event, projectData) => {
+    try {
+      const data = await fileService.readJSON('projects.json');
+      if (!data.projects) {
+        data.projects = [];
+      }
+
+      const now = new Date().toISOString();
+      const folder = fileService.slugify(projectData.name);
+
+      const newProject = {
+        id: fileService.generateId(),
+        name: projectData.name,
+        description: projectData.description || '',
+        folder,
+        createdAt: now,
+        modifiedAt: now,
+      };
+
+      // Create project folder
+      await fileService.createProjectFolder(folder);
+
+      data.projects.push(newProject);
+      await fileService.writeJSON('projects.json', data);
+
+      return { success: true, data: newProject };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('projects.update', async (_event, { id, updates }) => {
+    try {
+      const data = await fileService.readJSON('projects.json');
+      if (!data || !data.projects) {
+        return { success: false, error: 'PROJECT_NOT_FOUND' };
+      }
+
+      const projectIndex = data.projects.findIndex(p => p.id === id);
+      if (projectIndex === -1) {
+        return { success: false, error: 'PROJECT_NOT_FOUND' };
+      }
+
+      // If name changed, update folder
+      let newFolder = data.projects[projectIndex].folder;
+      if (updates.name && updates.name !== data.projects[projectIndex].name) {
+        const oldFolder = data.projects[projectIndex].folder;
+        newFolder = fileService.slugify(updates.name);
+        await fileService.renameProjectFolder(oldFolder, newFolder);
+        updates.folder = newFolder;
+      }
+
+      data.projects[projectIndex] = {
+        ...data.projects[projectIndex],
+        ...updates,
+        modifiedAt: new Date().toISOString(),
+      };
+
+      await fileService.writeJSON('projects.json', data);
+
+      return { success: true, data: data.projects[projectIndex] };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('projects.delete', async (_event, { id, deleteNotes = false }) => {
+    try {
+      const data = await fileService.readJSON('projects.json');
+      if (!data || !data.projects) {
+        return { success: false, error: 'PROJECT_NOT_FOUND' };
+      }
+
+      const projectIndex = data.projects.findIndex(p => p.id === id);
+      if (projectIndex === -1) {
+        return { success: false, error: 'PROJECT_NOT_FOUND' };
+      }
+
+      const project = data.projects[projectIndex];
+
+      if (deleteNotes) {
+        // Delete all notes in the project folder
+        await fileService.deleteProjectFolder(project.folder);
+      } else {
+        // Move notes to root (unlink from project)
+        const notes = await fileService.listNotes(project.folder);
+        for (const note of notes) {
+          const fullNote = await fileService.readNote(note.filePath);
+          const rootPath = path.join(
+            path.dirname(path.dirname(note.filePath)),
+            path.basename(note.filePath)
+          );
+          await fileService.deleteNote(note.filePath);
+          await fileService.writeNote(rootPath, { ...fullNote, projectId: null });
+        }
+        // Delete empty project folder
+        await fileService.deleteProjectFolder(project.folder);
+      }
+
+      // Unlink todos from this project
+      const todosData = await fileService.readJSON('todos.json');
+      if (todosData && todosData.todos) {
+        todosData.todos.forEach(todo => {
+          if (todo.projectId === id) {
+            todo.projectId = null;
+          }
+        });
+        await fileService.writeJSON('todos.json', todosData);
+      }
+
+      data.projects.splice(projectIndex, 1);
+      await fileService.writeJSON('projects.json', data);
+
+      return { success: true, data: { deleted: true } };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
 }
