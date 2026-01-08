@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git fetch:*)",
+      "Bash(powershell -ExecutionPolicy Bypass -File:*)",
+      "WebSearch",
+      "WebFetch(domain:electron-vite.org)",
+      "WebFetch(domain:www.electronjs.org)",
+      "WebFetch(domain:www.electron.build)"
+    ]
+  }
+}
