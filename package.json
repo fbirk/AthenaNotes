@@ -1,0 +1,35 @@
+{
+  "name": "developer-knowledge-base",
+  "version": "1.0.0",
+  "description": "Personal knowledge base desktop app for developers",
+  "type": "module",
+  "main": "src/main/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint src",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
+  },
+  "keywords": [
+    "electron",
+    "knowledge-base",
+    "notes"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^39.2.7",
+    "marked": "^17.0.1",
+    "vite": "^7.3.1",
+    "vite-plugin-electron": "^0.29.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "@vitest/ui": "^4.0.16",
+    "eslint": "^9.39.2",
+    "happy-dom": "^20.1.0",
+    "vitest": "^4.0.16"
+  }
+}
