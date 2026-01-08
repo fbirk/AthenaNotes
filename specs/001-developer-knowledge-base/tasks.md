@@ -51,9 +51,9 @@ All paths are relative to repository root `C:\Users\BirkF\source\repos\Knowledge
 - [x] T017 [P] Create theme variables in src/renderer/styles/themes.css
 - [x] T018 Create shared constants in src/shared/constants.js for app-wide values
 - [x] T019 [P] Create shared validators in src/shared/validators.js for input validation
-- [ ] T020 Implement file-service.js in src/main/services/file-service.js for file system operations
-- [ ] T021 Implement config-service.js in src/main/services/config-service.js for configuration management
-- [ ] T022 Wire IPC handlers for Configuration API in src/main/main.js (config.get, config.update, config.setStorageLocation)
+- [x] T020 Implement file-service.js in src/main/services/file-service.js for file system operations
+- [x] T021 Implement config-service.js in src/main/services/config-service.js for configuration management
+- [x] T022 Wire IPC handlers for Configuration API in src/main/main.js (config.get, config.update, config.setStorageLocation)
 - [x] T023 Create app initialization script in src/renderer/js/app.js
 - [x] T024 Create client-side router in src/renderer/js/router.js for hash-based navigation
 - [x] T025 Create simple state management in src/renderer/js/state.js
@@ -73,13 +73,13 @@ All paths are relative to repository root `C:\Users\BirkF\source\repos\Knowledge
 
 ### Implementation for User Story 2
 
-- [ ] T027 [US2] Create setup wizard UI component in src/renderer/js/components/setup.js
-- [ ] T028 [US2] Implement folder selection dialog using fs.selectFolder() IPC in setup component
-- [ ] T029 [US2] Add storage path validation in setup component (calls fs.validatePath())
-- [ ] T030 [US2] Implement first-run detection logic in src/renderer/js/app.js
-- [ ] T031 [US2] Create storage initialization in config-service.js (create .knowledgebase, notes/, snippets/ folders)
-- [ ] T032 [US2] Add setup completion flow to persist storage location and redirect to main app
-- [ ] T033 [US2] Add setup wizard styles in src/renderer/styles/components.css
+- [x] T027 [US2] Create setup wizard UI component in src/renderer/js/components/setup.js
+- [x] T028 [US2] Implement folder selection dialog using fs.selectFolder() IPC in setup component
+- [x] T029 [US2] Add storage path validation in setup component (calls fs.validatePath())
+- [x] T030 [US2] Implement first-run detection logic in src/renderer/js/app.js
+- [x] T031 [US2] Create storage initialization in config-service.js (create .knowledgebase, notes/, snippets/ folders)
+- [x] T032 [US2] Add setup completion flow to persist storage location and redirect to main app
+- [x] T033 [US2] Add setup wizard styles in src/renderer/styles/components.css
 
 **Checkpoint**: Users can complete setup and configure storage location - ready for notes (US1)
 
@@ -93,19 +93,19 @@ All paths are relative to repository root `C:\Users\BirkF\source\repos\Knowledge
 
 ### Implementation for User Story 1
 
-- [ ] T034 [P] [US1] Create Note entity IPC handlers in src/main/main.js (notes.list, notes.get, notes.create, notes.update, notes.delete, notes.search)
-- [ ] T035 [P] [US1] Implement notes file operations in src/main/services/file-service.js (read/write markdown files with frontmatter)
-- [ ] T036 [US1] Create markdown service in src/renderer/js/services/markdown.js using marked.js for parsing and rendering
-- [ ] T037 [US1] Create notes UI component in src/renderer/js/components/notes.js
-- [ ] T038 [US1] Implement note list view with sorting options (title, createdAt, modifiedAt) in notes component
-- [ ] T039 [US1] Implement note editor with preview/edit mode toggle in notes component
-- [ ] T040 [US1] Add markdown preview rendering in notes component using markdown service
-- [ ] T041 [US1] Implement note saving with 500ms debounce in notes component
-- [ ] T042 [US1] Add note creation UI (title input, content editor) in notes component
-- [ ] T043 [US1] Implement note deletion with confirmation in notes component
-- [ ] T044 [US1] Add validation for note titles (no special characters, not empty) in shared validators
-- [ ] T045 [US1] Add error handling for file operations (read errors, write errors) in notes component
-- [ ] T046 [US1] Add success/error feedback messages in notes component
+- [x] T034 [P] [US1] Create Note entity IPC handlers in src/main/main.js (notes.list, notes.get, notes.create, notes.update, notes.delete, notes.search)
+- [x] T035 [P] [US1] Implement notes file operations in src/main/services/file-service.js (read/write markdown files with frontmatter)
+- [x] T036 [US1] Create markdown service in src/renderer/js/services/markdown.js using marked.js for parsing and rendering
+- [x] T037 [US1] Create notes UI component in src/renderer/js/components/notes.js
+- [x] T038 [US1] Implement note list view with sorting options (title, createdAt, modifiedAt) in notes component
+- [x] T039 [US1] Implement note editor with preview/edit mode toggle in notes component
+- [x] T040 [US1] Add markdown preview rendering in notes component using markdown service
+- [x] T041 [US1] Implement note saving with 500ms debounce in notes component
+- [x] T042 [US1] Add note creation UI (title input, content editor) in notes component
+- [x] T043 [US1] Implement note deletion with confirmation in notes component
+- [x] T044 [US1] Add validation for note titles (no special characters, not empty) in shared validators
+- [x] T045 [US1] Add error handling for file operations (read errors, write errors) in notes component
+- [x] T046 [US1] Add success/error feedback messages in notes component
 
 **Checkpoint**: Users can create, edit, view, and delete notes - core knowledge base functionality complete (MVP!)
 

@@ -1,5 +1,9 @@
 import { defineConfig } from 'vite';
 import electron from 'vite-plugin-electron';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   root: 'src/renderer',
@@ -10,14 +14,23 @@ export default defineConfig({
   plugins: [
     electron([
       {
-        entry: 'src/main/main.js',
+        entry: '../main/main.js',
+        vite: {
+          build: {
+            outDir: path.join(__dirname, 'dist-electron'),
+          },
+        },
       },
       {
-        entry: 'src/main/preload.js',
-        onstart(options) {
-          if (options.reload) {
-            options.reload();
-          }
+        entry: '../main/preload.js',
+        vite: {
+          build: {
+            outDir: path.join(__dirname, 'dist-electron'),
+          },
+        },
+        onstart(args) {
+          // Notify the Renderer process to reload the page when the Preload scripts build is complete
+          args.reload();
         },
       },
     ]),
