@@ -1,0 +1,29 @@
+.placeholder-panel {
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 1rem;
+  background-color: var(--color-surface-alt);
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.navigation {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.navigation button {
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.navigation button:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}

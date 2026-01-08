@@ -23,17 +23,17 @@ All paths are relative to repository root `C:\Users\BirkF\source\repos\Knowledge
 
 **Purpose**: Project initialization and basic Electron + Vite structure
 
-- [ ] T001 Initialize npm project and create package.json with Electron + Vite configuration
-- [ ] T002 Install core dependencies: electron, marked, vite, vite-plugin-electron
-- [ ] T003 [P] Install dev dependencies: vitest, @vitest/ui, happy-dom, @playwright/test, eslint
-- [ ] T004 [P] Create vite.config.js with Electron plugin configuration
-- [ ] T005 [P] Create vitest.config.js for unit testing
-- [ ] T006 [P] Create playwright.config.js for E2E testing
-- [ ] T007 [P] Create .eslintrc.json with ES2022+ configuration
-- [ ] T008 [P] Create src/main/ directory structure (main.js, preload.js, services/)
-- [ ] T009 [P] Create src/renderer/ directory structure (index.html, js/, styles/, assets/)
-- [ ] T010 [P] Create src/shared/ directory for shared constants and validators
-- [ ] T011 [P] Create tests/ directory structure (unit/, integration/, e2e/)
+- [x] T001 Initialize npm project and create package.json with Electron + Vite configuration
+- [x] T002 Install core dependencies: electron, marked, vite, vite-plugin-electron
+- [x] T003 [P] Install dev dependencies: vitest, @vitest/ui, happy-dom, @playwright/test, eslint
+- [x] T004 [P] Create vite.config.js with Electron plugin configuration
+- [x] T005 [P] Create vitest.config.js for unit testing
+- [x] T006 [P] Create playwright.config.js for E2E testing
+- [x] T007 [P] Create .eslintrc.json with ES2022+ configuration
+- [x] T008 [P] Create src/main/ directory structure (main.js, preload.js, services/)
+- [x] T009 [P] Create src/renderer/ directory structure (index.html, js/, styles/, assets/)
+- [x] T010 [P] Create src/shared/ directory for shared constants and validators
+- [x] T011 [P] Create tests/ directory structure (unit/, integration/, e2e/)
 
 ---
 
@@ -43,21 +43,21 @@ All paths are relative to repository root `C:\Users\BirkF\source\repos\Knowledge
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T012 Create basic Electron main process in src/main/main.js with window management
-- [ ] T013 Create preload script in src/main/preload.js with contextBridge for secure IPC
-- [ ] T014 Create basic HTML structure in src/renderer/index.html with navigation layout
-- [ ] T015 [P] Create global styles in src/renderer/styles/main.css
-- [ ] T016 [P] Create component styles in src/renderer/styles/components.css
-- [ ] T017 [P] Create theme variables in src/renderer/styles/themes.css
-- [ ] T018 Create shared constants in src/shared/constants.js for app-wide values
-- [ ] T019 [P] Create shared validators in src/shared/validators.js for input validation
+- [x] T012 Create basic Electron main process in src/main/main.js with window management
+- [x] T013 Create preload script in src/main/preload.js with contextBridge for secure IPC
+- [x] T014 Create basic HTML structure in src/renderer/index.html with navigation layout
+- [x] T015 [P] Create global styles in src/renderer/styles/main.css
+- [x] T016 [P] Create component styles in src/renderer/styles/components.css
+- [x] T017 [P] Create theme variables in src/renderer/styles/themes.css
+- [x] T018 Create shared constants in src/shared/constants.js for app-wide values
+- [x] T019 [P] Create shared validators in src/shared/validators.js for input validation
 - [ ] T020 Implement file-service.js in src/main/services/file-service.js for file system operations
 - [ ] T021 Implement config-service.js in src/main/services/config-service.js for configuration management
 - [ ] T022 Wire IPC handlers for Configuration API in src/main/main.js (config.get, config.update, config.setStorageLocation)
-- [ ] T023 Create app initialization script in src/renderer/js/app.js
-- [ ] T024 Create client-side router in src/renderer/js/router.js for hash-based navigation
-- [ ] T025 Create simple state management in src/renderer/js/state.js
-- [ ] T026 Create IPC API wrapper in src/renderer/js/services/api.js for renderer-to-main communication
+- [x] T023 Create app initialization script in src/renderer/js/app.js
+- [x] T024 Create client-side router in src/renderer/js/router.js for hash-based navigation
+- [x] T025 Create simple state management in src/renderer/js/state.js
+- [x] T026 Create IPC API wrapper in src/renderer/js/services/api.js for renderer-to-main communication
 
 **Checkpoint**: Foundation ready - Electron app launches, IPC communication works, user story implementation can now begin
 
