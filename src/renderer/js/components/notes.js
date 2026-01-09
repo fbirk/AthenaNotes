@@ -366,7 +366,7 @@ export class NotesComponent {
         if (result.success) {
           this.preloadCache.set(noteMetadata.id, result.data);
         }
-      } catch (error) {
+      } catch {
         // Silently fail preloading
         console.debug('Failed to preload note:', noteMetadata.id);
       }

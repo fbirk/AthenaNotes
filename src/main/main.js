@@ -57,6 +57,60 @@ app.on('window-all-closed', () => {
 function setupIpcHandlers() {
   // Configuration API
   ipcMain.handle('config.get', async () => {
+  // ==================== Snippet API ====================
+  ipcMain.handle('snippets.list', async () => {
+    try {
+      const snippets = await fileService.listSnippets();
+      return { success: true, data: snippets };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('snippets.get', async (_event, id) => {
+    try {
+      const snippet = await fileService.getSnippet(id);
+      return { success: true, data: snippet };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('snippets.create', async (_event, snippetData) => {
+    try {
+      const snippet = await fileService.createSnippet(snippetData);
+      return { success: true, data: snippet };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('snippets.update', async (_event, id, updates) => {
+    try {
+      const snippet = await fileService.updateSnippet(id, updates);
+      return { success: true, data: snippet };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('snippets.delete', async (_event, id) => {
+    try {
+      await fileService.deleteSnippet(id);
+      return { success: true, data: { deleted: true } };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('snippets.search', async (_event, query, tagFilters) => {
+    try {
+      const results = await fileService.searchSnippets(query, tagFilters);
+      return { success: true, data: results };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
     try {
       const config = await configService.getConfig();
       if (!config) {
@@ -580,6 +634,242 @@ function setupIpcHandlers() {
       await fileService.writeJSON('projects.json', data);
 
       return { success: true, data: { deleted: true } };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  // ==================== Milestones API ====================
+  ipcMain.handle('milestones.list', async (_event, projectId) => {
+    try {
+      const data = await fileService.readJSON('milestones.json');
+      let milestones = data?.milestones || [];
+
+      // Filter by project if provided
+      if (projectId) {
+        milestones = milestones.filter(m => m.projectId === projectId);
+      }
+
+      // Sort by deadline (chronological)
+      milestones.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+
+      return { success: true, data: milestones };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('milestones.create', async (_event, milestoneData) => {
+    try {
+      const data = await fileService.readJSON('milestones.json') || { milestones: [] };
+      const now = new Date().toISOString();
+
+      const newMilestone = {
+        id: fileService.generateId(),
+        projectId: milestoneData.projectId,
+        title: milestoneData.title,
+        description: milestoneData.description || '',
+        deadline: milestoneData.deadline,
+        completed: false,
+        completedAt: null,
+        createdAt: now,
+        modifiedAt: now,
+      };
+
+      data.milestones.push(newMilestone);
+      await fileService.writeJSON('milestones.json', data);
+
+      return { success: true, data: newMilestone };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('milestones.update', async (_event, { id, updates }) => {
+    try {
+      const data = await fileService.readJSON('milestones.json');
+      if (!data || !data.milestones) {
+        return { success: false, error: 'MILESTONE_NOT_FOUND' };
+      }
+
+      const milestoneIndex = data.milestones.findIndex(m => m.id === id);
+      if (milestoneIndex === -1) {
+        return { success: false, error: 'MILESTONE_NOT_FOUND' };
+      }
+
+      data.milestones[milestoneIndex] = {
+        ...data.milestones[milestoneIndex],
+        ...updates,
+        modifiedAt: new Date().toISOString(),
+      };
+
+      await fileService.writeJSON('milestones.json', data);
+
+      return { success: true, data: data.milestones[milestoneIndex] };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('milestones.toggleComplete', async (_event, id) => {
+    try {
+      const data = await fileService.readJSON('milestones.json');
+      if (!data || !data.milestones) {
+        return { success: false, error: 'MILESTONE_NOT_FOUND' };
+      }
+
+      const milestoneIndex = data.milestones.findIndex(m => m.id === id);
+      if (milestoneIndex === -1) {
+        return { success: false, error: 'MILESTONE_NOT_FOUND' };
+      }
+
+      const milestone = data.milestones[milestoneIndex];
+      milestone.completed = !milestone.completed;
+      milestone.completedAt = milestone.completed ? new Date().toISOString() : null;
+      milestone.modifiedAt = new Date().toISOString();
+
+      await fileService.writeJSON('milestones.json', data);
+
+      return { success: true, data: milestone };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('milestones.delete', async (_event, id) => {
+    try {
+      const data = await fileService.readJSON('milestones.json');
+      if (!data || !data.milestones) {
+        return { success: false, error: 'MILESTONE_NOT_FOUND' };
+      }
+
+      const milestoneIndex = data.milestones.findIndex(m => m.id === id);
+      if (milestoneIndex === -1) {
+        return { success: false, error: 'MILESTONE_NOT_FOUND' };
+      }
+
+      data.milestones.splice(milestoneIndex, 1);
+      await fileService.writeJSON('milestones.json', data);
+
+      return { success: true, data: { deleted: true } };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  // ==================== Tools API ====================
+  ipcMain.handle('tools.list', async () => {
+    try {
+      const data = await fileService.readJSON('tools.json');
+      const tools = data?.tools || [];
+
+      // Sort by category, then by name
+      tools.sort((a, b) => {
+        if (a.category !== b.category) {
+          return (a.category || '').localeCompare(b.category || '');
+        }
+        return a.name.localeCompare(b.name);
+      });
+
+      return { success: true, data: tools };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('tools.create', async (_event, toolData) => {
+    try {
+      const data = await fileService.readJSON('tools.json') || { tools: [] };
+      const now = new Date().toISOString();
+
+      const newTool = {
+        id: fileService.generateId(),
+        name: toolData.name,
+        description: toolData.description || '',
+        launchPath: toolData.launchPath,
+        launchType: toolData.launchType || 'application',
+        category: toolData.category || 'General',
+        createdAt: now,
+        modifiedAt: now,
+      };
+
+      data.tools.push(newTool);
+      await fileService.writeJSON('tools.json', data);
+
+      return { success: true, data: newTool };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('tools.update', async (_event, { id, updates }) => {
+    try {
+      const data = await fileService.readJSON('tools.json');
+      if (!data || !data.tools) {
+        return { success: false, error: 'TOOL_NOT_FOUND' };
+      }
+
+      const toolIndex = data.tools.findIndex(t => t.id === id);
+      if (toolIndex === -1) {
+        return { success: false, error: 'TOOL_NOT_FOUND' };
+      }
+
+      data.tools[toolIndex] = {
+        ...data.tools[toolIndex],
+        ...updates,
+        modifiedAt: new Date().toISOString(),
+      };
+
+      await fileService.writeJSON('tools.json', data);
+
+      return { success: true, data: data.tools[toolIndex] };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('tools.delete', async (_event, id) => {
+    try {
+      const data = await fileService.readJSON('tools.json');
+      if (!data || !data.tools) {
+        return { success: false, error: 'TOOL_NOT_FOUND' };
+      }
+
+      const toolIndex = data.tools.findIndex(t => t.id === id);
+      if (toolIndex === -1) {
+        return { success: false, error: 'TOOL_NOT_FOUND' };
+      }
+
+      data.tools.splice(toolIndex, 1);
+      await fileService.writeJSON('tools.json', data);
+
+      return { success: true, data: { deleted: true } };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('tools.launch', async (_event, id) => {
+    try {
+      const data = await fileService.readJSON('tools.json');
+      if (!data || !data.tools) {
+        return { success: false, error: 'TOOL_NOT_FOUND' };
+      }
+
+      const tool = data.tools.find(t => t.id === id);
+      if (!tool) {
+        return { success: false, error: 'TOOL_NOT_FOUND' };
+      }
+
+      const { shell } = await import('electron');
+
+      if (tool.launchType === 'url') {
+        await shell.openExternal(tool.launchPath);
+      } else {
+        await shell.openPath(tool.launchPath);
+      }
+
+      return { success: true, data: { launched: true } };
     } catch (error) {
       return { success: false, error: error.message };
     }

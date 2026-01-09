@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:win": "vite build && electron-builder --win",
     "lint": "eslint src",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -19,6 +20,33 @@
   ],
   "author": "",
   "license": "MIT",
+  "build": {
+    "appId": "com.knowledgebase.app",
+    "productName": "Developer Knowledge Base",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  },
   "dependencies": {
     "electron": "^39.2.7",
     "marked": "^17.0.1",
@@ -29,6 +57,7 @@
   "devDependencies": {
     "@playwright/test": "^1.57.0",
     "@vitest/ui": "^4.0.16",
+    "electron-builder": "^26.0.12",
     "eslint": "^9.39.2",
     "happy-dom": "^20.1.0",
     "vite-plugin-electron-renderer": "^0.14.6",

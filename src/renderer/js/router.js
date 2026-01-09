@@ -1,6 +1,9 @@
 import { SetupComponent } from './components/setup.js';
 import { NotesComponent } from './components/notes.js';
 import { ProjectsComponent } from './components/projects.js';
+import { renderSnippetsComponent } from './components/snippets.js';
+import { renderRoadmapsComponent } from './components/roadmaps.js';
+import { renderToolsComponent } from './components/tools.js';
 
 // Store active component instance
 let activeComponent = null;
@@ -23,8 +26,18 @@ const routes = new Map([
     projectsComponent.setupEventListeners();
     return projectsComponent;
   }],
-  ['#/snippets', () => '<div class="placeholder-panel">Snippets UI coming soon.</div>'],
-  ['#/tools', () => '<div class="placeholder-panel">Tools UI coming soon.</div>'],
+  ['#/snippets', async (container) => {
+    await renderSnippetsComponent(container);
+    return null;
+  }],
+  ['#/roadmaps', async (container) => {
+    await renderRoadmapsComponent(container);
+    return null;
+  }],
+  ['#/tools', async (container) => {
+    await renderToolsComponent(container);
+    return null;
+  }],
 ]);
 
 async function renderRoute(state) {

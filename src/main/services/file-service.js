@@ -9,6 +9,182 @@ import { v4 as uuidv4 } from 'uuid';
  */
 
 class FileService {
+    // ==================== Snippet Operations ====================
+
+    /**
+     * List all code snippets
+     * @returns {Promise<Array>} Array of snippet metadata
+     */
+    async listSnippets() {
+      const snippetsDir = path.join(this.storageRoot, 'snippets');
+      await this.ensureDirectoryExists(snippetsDir);
+      const files = await fs.readdir(snippetsDir);
+      const snippets = [];
+      for (const file of files) {
+        if (file.endsWith('.json')) {
+          try {
+            const snippet = await this.getSnippetByFile(path.join(snippetsDir, file));
+            snippets.push(snippet);
+          } catch {
+            // skip invalid/corrupt files
+          }
+        }
+      }
+      return snippets;
+    }
+
+    /**
+     * Get a single snippet by ID
+     * @param {string} id - Snippet UUID
+     * @returns {Promise<Object>} Snippet object
+     */
+    async getSnippet(id) {
+      const snippetsDir = path.join(this.storageRoot, 'snippets');
+      await this.ensureDirectoryExists(snippetsDir);
+      const files = await fs.readdir(snippetsDir);
+      for (const file of files) {
+        if (file.endsWith('.json')) {
+          const filePath = path.join(snippetsDir, file);
+          const snippet = await this.getSnippetByFile(filePath);
+          if (snippet.id === id) {
+            return snippet;
+          }
+        }
+      }
+      throw new Error('SNIPPET_NOT_FOUND');
+    }
+
+    /**
+     * Helper: Read snippet JSON file by path
+     */
+    async getSnippetByFile(filePath) {
+      const data = await fs.readFile(filePath, 'utf-8');
+      return JSON.parse(data);
+    }
+
+    /**
+     * Create a new snippet
+     * @param {Object} snippetData
+     * @returns {Promise<Object>} Created snippet
+     */
+    async createSnippet(snippetData) {
+      // Validation
+      if (!snippetData.title || !snippetData.title.trim()) throw new Error('VALIDATION_ERROR');
+      if (!snippetData.language || !snippetData.language.trim()) throw new Error('VALIDATION_ERROR');
+      if (!snippetData.code || !snippetData.code.trim()) throw new Error('VALIDATION_ERROR');
+      if (!snippetData.tags || typeof snippetData.tags !== 'object') throw new Error('VALIDATION_ERROR');
+      if (!Object.values(snippetData.tags).flat().length) throw new Error('VALIDATION_ERROR');
+
+      const now = new Date().toISOString();
+      const id = uuidv4();
+      const fileName = `${id}.json`;
+      const snippetsDir = path.join(this.storageRoot, 'snippets');
+      await this.ensureDirectoryExists(snippetsDir);
+      const snippet = {
+        id,
+        title: snippetData.title.trim(),
+        description: snippetData.description?.trim() || '',
+        language: snippetData.language.trim().toLowerCase(),
+        code: snippetData.code,
+        tags: {
+          language: (snippetData.tags.language || []).map(t => t.toLowerCase()),
+          usage: (snippetData.tags.usage || []).map(t => t.toLowerCase()),
+          module: (snippetData.tags.module || []).map(t => t.toLowerCase()),
+        },
+        createdAt: now,
+        modifiedAt: now,
+      };
+      const filePath = path.join(snippetsDir, fileName);
+      await fs.writeFile(filePath, JSON.stringify(snippet, null, 2), 'utf-8');
+      return snippet;
+    }
+
+    /**
+     * Update an existing snippet
+     * @param {string} id - Snippet UUID
+     * @param {Object} updates - Fields to update
+     * @returns {Promise<Object>} Updated snippet
+     */
+    async updateSnippet(id, updates) {
+      const snippet = await this.getSnippet(id);
+      let changed = false;
+      if (updates.title && updates.title.trim() && updates.title !== snippet.title) {
+        snippet.title = updates.title.trim();
+        changed = true;
+      }
+      if (typeof updates.description === 'string' && updates.description !== snippet.description) {
+        snippet.description = updates.description.trim();
+        changed = true;
+      }
+      if (updates.language && updates.language.trim() && updates.language !== snippet.language) {
+        snippet.language = updates.language.trim().toLowerCase();
+        changed = true;
+      }
+      if (updates.code && updates.code !== snippet.code) {
+        snippet.code = updates.code;
+        changed = true;
+      }
+      if (updates.tags && typeof updates.tags === 'object') {
+        snippet.tags = {
+          language: (updates.tags.language || snippet.tags.language || []).map(t => t.toLowerCase()),
+          usage: (updates.tags.usage || snippet.tags.usage || []).map(t => t.toLowerCase()),
+          module: (updates.tags.module || snippet.tags.module || []).map(t => t.toLowerCase()),
+        };
+        changed = true;
+      }
+      if (changed) {
+        snippet.modifiedAt = new Date().toISOString();
+        const snippetsDir = path.join(this.storageRoot, 'snippets');
+        const filePath = path.join(snippetsDir, `${id}.json`);
+        await fs.writeFile(filePath, JSON.stringify(snippet, null, 2), 'utf-8');
+      }
+      return snippet;
+    }
+
+    /**
+     * Delete a snippet by ID
+     * @param {string} id - Snippet UUID
+     */
+    async deleteSnippet(id) {
+      const snippetsDir = path.join(this.storageRoot, 'snippets');
+      const filePath = path.join(snippetsDir, `${id}.json`);
+      try {
+        await fs.unlink(filePath);
+      } catch (error) {
+        if (error.code === 'ENOENT') throw new Error('SNIPPET_NOT_FOUND');
+        throw new Error('DELETE_ERROR');
+      }
+    }
+
+    /**
+     * Search snippets by keyword and tags
+     * @param {string} query - Search term
+     * @param {object} tagFilters - { language: [], usage: [], module: [] }
+     * @returns {Promise<Array>} Matching snippets
+     */
+    async searchSnippets(query, tagFilters = {}) {
+      const all = await this.listSnippets();
+      let results = all;
+      if (query && query.trim()) {
+        const q = query.trim().toLowerCase();
+        results = results.filter(snippet =>
+          snippet.title.toLowerCase().includes(q) ||
+          snippet.description.toLowerCase().includes(q) ||
+          snippet.code.toLowerCase().includes(q)
+        );
+      }
+      // Tag filtering (AND logic for each category)
+      for (const cat of ['language', 'usage', 'module']) {
+        if (tagFilters[cat] && tagFilters[cat].length) {
+          results = results.filter(snippet =>
+            tagFilters[cat].every(tag => (snippet.tags[cat] || []).includes(tag.toLowerCase()))
+          );
+        }
+      }
+      // Sort by modifiedAt desc, then createdAt desc
+      results.sort((a, b) => (b.modifiedAt || '').localeCompare(a.modifiedAt || '') || (b.createdAt || '').localeCompare(a.createdAt || ''));
+      return results;
+    }
   constructor() {
     this.storageRoot = null;
     this.configPath = null;
@@ -81,7 +257,7 @@ class FileService {
     try {
       await this.ensureDirectoryExists(path.dirname(this.configPath));
       await fs.writeFile(this.configPath, JSON.stringify(config, null, 2), 'utf-8');
-    } catch (error) {
+    } catch {
       throw new Error('WRITE_ERROR');
     }
   }
@@ -146,7 +322,7 @@ class FileService {
       }
 
       return notes;
-    } catch (error) {
+    } catch {
       return [];
     }
   }
@@ -275,7 +451,7 @@ class FileService {
 
       const content = `---\n${yamlLines.join('\n')}\n---\n\n${note.content}`;
       await fs.writeFile(filePath, content, 'utf-8');
-    } catch (error) {
+    } catch {
       throw new Error('WRITE_ERROR');
     }
   }
@@ -395,7 +571,7 @@ class FileService {
     try {
       await this.ensureDirectoryExists(path.dirname(filePath));
       await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
-    } catch (error) {
+    } catch {
       throw new Error('WRITE_ERROR');
     }
   }
@@ -410,7 +586,7 @@ class FileService {
     const notesDir = path.join(this.storageRoot, 'notes', folderName);
     try {
       await this.ensureDirectoryExists(notesDir);
-    } catch (error) {
+    } catch {
       throw new Error('FOLDER_CREATE_ERROR');
     }
   }
@@ -425,8 +601,8 @@ class FileService {
     const newPath = path.join(this.storageRoot, 'notes', newName);
     try {
       await fs.rename(oldPath, newPath);
-    } catch (error) {
-      if (error.code === 'ENOENT') {
+    } catch (err) {
+      if (err.code === 'ENOENT') {
         throw new Error('FOLDER_NOT_FOUND');
       }
       throw new Error('FOLDER_RENAME_ERROR');
@@ -441,7 +617,7 @@ class FileService {
     const folderPath = path.join(this.storageRoot, 'notes', folderName);
     try {
       await fs.rm(folderPath, { recursive: true, force: true });
-    } catch (error) {
+    } catch {
       throw new Error('FOLDER_DELETE_ERROR');
     }
   }

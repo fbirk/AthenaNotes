@@ -189,18 +189,18 @@ All paths are relative to repository root `C:\Users\BirkF\source\repos\Knowledge
 
 ### Implementation for User Story 6
 
-- [ ] T078 [P] [US6] Create Snippet entity IPC handlers in src/main/main.js (snippets.list, snippets.get, snippets.create, snippets.update, snippets.delete, snippets.search)
-- [ ] T079 [P] [US6] Implement snippets JSON file operations in src/main/services/file-service.js (read/write snippets/*.json)
-- [ ] T080 [US6] Create snippets UI component in src/renderer/js/components/snippets.js
-- [ ] T081 [US6] Implement snippet list view with language/tag filters in snippets component
-- [ ] T082 [US6] Add snippet creation UI (title, description, language, code, tags) in snippets component
-- [ ] T083 [US6] Implement code editor with syntax highlighting (using highlight.js or similar) in snippets component
-- [ ] T084 [US6] Add tag input UI for language, usage, and module categories in snippets component
-- [ ] T085 [US6] Implement search index builder in src/main/services/file-service.js (index title, description, code, tags)
-- [ ] T086 [US6] Implement search functionality meeting SC-006 (< 2s for 1000+ snippets) in file-service.js
-- [ ] T087 [US6] Add search UI with keyword and tag filters in snippets component
-- [ ] T088 [US6] Implement copy-to-clipboard functionality for code in snippets component
-- [ ] T089 [US6] Style code blocks with syntax highlighting in src/renderer/styles/components.css
+- [x] T078 [P] [US6] Create Snippet entity IPC handlers in src/main/main.js (snippets.list, snippets.get, snippets.create, snippets.update, snippets.delete, snippets.search)
+- [x] T079 [P] [US6] Implement snippets JSON file operations in src/main/services/file-service.js (read/write snippets/*.json)
+- [x] T080 [US6] Create snippets UI component in src/renderer/js/components/snippets.js
+- [x] T081 [US6] Implement snippet list view with language/tag filters in snippets component
+- [x] T082 [US6] Add snippet creation UI (title, description, language, code, tags) in snippets component
+- [x] T083 [US6] Implement code editor with syntax highlighting (using highlight.js or similar) in snippets component
+- [x] T084 [US6] Add tag input UI for language, usage, and module categories in snippets component
+- [x] T085 [US6] Implement search index builder in src/main/services/file-service.js (index title, description, code, tags)
+- [x] T086 [US6] Implement search functionality meeting SC-006 (< 2s for 1000+ snippets) in file-service.js
+- [x] T087 [US6] Add search UI with keyword and tag filters in snippets component
+- [x] T088 [US6] Implement copy-to-clipboard functionality for code in snippets component
+- [x] T089 [US6] Style code blocks with syntax highlighting in src/renderer/styles/components.css
 
 **Checkpoint**: Code snippets are searchable and organized by tags - developer workflow enhanced
 
@@ -214,15 +214,15 @@ All paths are relative to repository root `C:\Users\BirkF\source\repos\Knowledge
 
 ### Implementation for User Story 7
 
-- [ ] T090 [P] [US7] Create Milestone entity IPC handlers in src/main/main.js (milestones.list, milestones.create, milestones.update, milestones.toggleComplete, milestones.delete)
-- [ ] T091 [P] [US7] Implement milestones JSON storage operations in src/main/services/file-service.js (read/write milestones.json)
-- [ ] T092 [US7] Create roadmaps UI component in src/renderer/js/components/roadmaps.js
-- [ ] T093 [US7] Implement milestone list view sorted by deadline (chronological) in roadmaps component
-- [ ] T094 [US7] Add milestone creation UI (title, description, deadline) linked to project in roadmaps component
-- [ ] T095 [US7] Implement milestone completion toggle in roadmaps component
-- [ ] T096 [US7] Create project roadmap view in projects component (show project's milestones)
-- [ ] T097 [US7] Implement summary view of all project roadmaps in roadmaps component
-- [ ] T098 [US7] Style milestone timeline visualization in src/renderer/styles/components.css
+- [x] T090 [P] [US7] Create Milestone entity IPC handlers in src/main/main.js (milestones.list, milestones.create, milestones.update, milestones.toggleComplete, milestones.delete)
+- [x] T091 [P] [US7] Implement milestones JSON storage operations in src/main/services/file-service.js (read/write milestones.json)
+- [x] T092 [US7] Create roadmaps UI component in src/renderer/js/components/roadmaps.js
+- [x] T093 [US7] Implement milestone list view sorted by deadline (chronological) in roadmaps component
+- [x] T094 [US7] Add milestone creation UI (title, description, deadline) linked to project in roadmaps component
+- [x] T095 [US7] Implement milestone completion toggle in roadmaps component
+- [x] T096 [US7] Create project roadmap view in projects component (show project's milestones)
+- [x] T097 [US7] Implement summary view of all project roadmaps in roadmaps component
+- [x] T098 [US7] Style milestone timeline visualization in src/renderer/styles/components.css
 
 **Checkpoint**: Project roadmaps provide high-level progress tracking - project management complete
 
@@ -236,16 +236,16 @@ All paths are relative to repository root `C:\Users\BirkF\source\repos\Knowledge
 
 ### Implementation for User Story 8
 
-- [ ] T099 [P] [US8] Create Tool entity IPC handlers in src/main/main.js (tools.list, tools.create, tools.update, tools.delete, tools.launch)
-- [ ] T100 [P] [US8] Implement tools JSON storage operations in src/main/services/file-service.js (read/write tools.json)
-- [ ] T101 [US8] Implement shell-service.js in src/main/services/shell-service.js for launching applications/URLs
-- [ ] T102 [US8] Create tools UI component in src/renderer/js/components/tools.js
-- [ ] T103 [US8] Implement tools list view with category grouping in tools component
-- [ ] T104 [US8] Add tool creation UI (name, description, launchPath, launchType, category) in tools component
-- [ ] T105 [US8] Implement launch functionality (click to open) in tools component
-- [ ] T106 [US8] Add validation for launch paths (check file exists for apps) in shared validators
-- [ ] T107 [US8] Add error handling for invalid paths/URLs in tools component
-- [ ] T108 [US8] Style tools as clickable cards/buttons in src/renderer/styles/components.css
+- [x] T099 [P] [US8] Create Tool entity IPC handlers in src/main/main.js (tools.list, tools.create, tools.update, tools.delete, tools.launch)
+- [x] T100 [P] [US8] Implement tools JSON storage operations in src/main/services/file-service.js (read/write tools.json)
+- [x] T101 [US8] Implement shell-service.js in src/main/services/shell-service.js for launching applications/URLs
+- [x] T102 [US8] Create tools UI component in src/renderer/js/components/tools.js
+- [x] T103 [US8] Implement tools list view with category grouping in tools component
+- [x] T104 [US8] Add tool creation UI (name, description, launchPath, launchType, category) in tools component
+- [x] T105 [US8] Implement launch functionality (click to open) in tools component
+- [x] T106 [US8] Add validation for launch paths (check file exists for apps) in shared validators
+- [x] T107 [US8] Add error handling for invalid paths/URLs in tools component
+- [x] T108 [US8] Style tools as clickable cards/buttons in src/renderer/styles/components.css
 
 **Checkpoint**: Tools section provides quick access to external applications - workflow integration complete
 
@@ -259,8 +259,8 @@ All paths are relative to repository root `C:\Users\BirkF\source\repos\Knowledge
 - [ ] T110 [P] Implement LRU cache for rendered HTML (max 20 notes) in markdown.js
 - [ ] T111 [P] Add lazy loading for large note lists in notes component (load incrementally if > 100 notes)
 - [ ] T112 [P] Add lazy loading for snippet lists in snippets component (load incrementally if > 500 snippets)
-- [ ] T113 Optimize app launch time to meet SC-007 (< 3s) in main.js (use ready-to-show event)
-- [ ] T114 [P] Add keyboard shortcuts for common actions (Ctrl+N new note, Ctrl+S save, Ctrl+F search)
+- [x] T113 Optimize app launch time to meet SC-007 (< 3s) in main.js (use ready-to-show event)
+- [x] T114 [P] Add keyboard shortcuts for common actions (Ctrl+N new note, Ctrl+S save, Ctrl+F search)
 - [ ] T115 [P] Implement autosave for notes (every 30s if changes exist) in notes component
 - [ ] T116 [P] Add loading indicators for async operations in all components
 - [ ] T117 [P] Add UI transitions and animations in src/renderer/styles/components.css
@@ -274,7 +274,7 @@ All paths are relative to repository root `C:\Users\BirkF\source\repos\Knowledge
 - [ ] T125 [P] Add security: validate file paths to prevent directory traversal in file-service.js
 - [ ] T126 [P] Create user documentation in docs/user-guide.md
 - [ ] T127 [P] Create developer documentation in docs/developer-guide.md
-- [ ] T128 Add electron-builder configuration for Windows packaging in package.json
+- [x] T128 Add electron-builder configuration for Windows packaging in package.json
 - [ ] T129 Verify all success criteria SC-001 through SC-009 are met
 
 ---

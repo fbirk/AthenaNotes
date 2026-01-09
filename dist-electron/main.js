@@ -37,6 +37,168 @@ function v4(options, buf, offset) {
   return _v4(options);
 }
 class FileService {
+  // ==================== Snippet Operations ====================
+  /**
+   * List all code snippets
+   * @returns {Promise<Array>} Array of snippet metadata
+   */
+  async listSnippets() {
+    const snippetsDir = path.join(this.storageRoot, "snippets");
+    await this.ensureDirectoryExists(snippetsDir);
+    const files = await fs.readdir(snippetsDir);
+    const snippets = [];
+    for (const file of files) {
+      if (file.endsWith(".json")) {
+        try {
+          const snippet = await this.getSnippetByFile(path.join(snippetsDir, file));
+          snippets.push(snippet);
+        } catch {
+        }
+      }
+    }
+    return snippets;
+  }
+  /**
+   * Get a single snippet by ID
+   * @param {string} id - Snippet UUID
+   * @returns {Promise<Object>} Snippet object
+   */
+  async getSnippet(id) {
+    const snippetsDir = path.join(this.storageRoot, "snippets");
+    await this.ensureDirectoryExists(snippetsDir);
+    const files = await fs.readdir(snippetsDir);
+    for (const file of files) {
+      if (file.endsWith(".json")) {
+        const filePath = path.join(snippetsDir, file);
+        const snippet = await this.getSnippetByFile(filePath);
+        if (snippet.id === id) {
+          return snippet;
+        }
+      }
+    }
+    throw new Error("SNIPPET_NOT_FOUND");
+  }
+  /**
+   * Helper: Read snippet JSON file by path
+   */
+  async getSnippetByFile(filePath) {
+    const data = await fs.readFile(filePath, "utf-8");
+    return JSON.parse(data);
+  }
+  /**
+   * Create a new snippet
+   * @param {Object} snippetData
+   * @returns {Promise<Object>} Created snippet
+   */
+  async createSnippet(snippetData) {
+    if (!snippetData.title || !snippetData.title.trim()) throw new Error("VALIDATION_ERROR");
+    if (!snippetData.language || !snippetData.language.trim()) throw new Error("VALIDATION_ERROR");
+    if (!snippetData.code || !snippetData.code.trim()) throw new Error("VALIDATION_ERROR");
+    if (!snippetData.tags || typeof snippetData.tags !== "object") throw new Error("VALIDATION_ERROR");
+    if (!Object.values(snippetData.tags).flat().length) throw new Error("VALIDATION_ERROR");
+    const now = (/* @__PURE__ */ new Date()).toISOString();
+    const id = v4();
+    const fileName = `${id}.json`;
+    const snippetsDir = path.join(this.storageRoot, "snippets");
+    await this.ensureDirectoryExists(snippetsDir);
+    const snippet = {
+      id,
+      title: snippetData.title.trim(),
+      description: snippetData.description?.trim() || "",
+      language: snippetData.language.trim().toLowerCase(),
+      code: snippetData.code,
+      tags: {
+        language: (snippetData.tags.language || []).map((t) => t.toLowerCase()),
+        usage: (snippetData.tags.usage || []).map((t) => t.toLowerCase()),
+        module: (snippetData.tags.module || []).map((t) => t.toLowerCase())
+      },
+      createdAt: now,
+      modifiedAt: now
+    };
+    const filePath = path.join(snippetsDir, fileName);
+    await fs.writeFile(filePath, JSON.stringify(snippet, null, 2), "utf-8");
+    return snippet;
+  }
+  /**
+   * Update an existing snippet
+   * @param {string} id - Snippet UUID
+   * @param {Object} updates - Fields to update
+   * @returns {Promise<Object>} Updated snippet
+   */
+  async updateSnippet(id, updates) {
+    const snippet = await this.getSnippet(id);
+    let changed = false;
+    if (updates.title && updates.title.trim() && updates.title !== snippet.title) {
+      snippet.title = updates.title.trim();
+      changed = true;
+    }
+    if (typeof updates.description === "string" && updates.description !== snippet.description) {
+      snippet.description = updates.description.trim();
+      changed = true;
+    }
+    if (updates.language && updates.language.trim() && updates.language !== snippet.language) {
+      snippet.language = updates.language.trim().toLowerCase();
+      changed = true;
+    }
+    if (updates.code && updates.code !== snippet.code) {
+      snippet.code = updates.code;
+      changed = true;
+    }
+    if (updates.tags && typeof updates.tags === "object") {
+      snippet.tags = {
+        language: (updates.tags.language || snippet.tags.language || []).map((t) => t.toLowerCase()),
+        usage: (updates.tags.usage || snippet.tags.usage || []).map((t) => t.toLowerCase()),
+        module: (updates.tags.module || snippet.tags.module || []).map((t) => t.toLowerCase())
+      };
+      changed = true;
+    }
+    if (changed) {
+      snippet.modifiedAt = (/* @__PURE__ */ new Date()).toISOString();
+      const snippetsDir = path.join(this.storageRoot, "snippets");
+      const filePath = path.join(snippetsDir, `${id}.json`);
+      await fs.writeFile(filePath, JSON.stringify(snippet, null, 2), "utf-8");
+    }
+    return snippet;
+  }
+  /**
+   * Delete a snippet by ID
+   * @param {string} id - Snippet UUID
+   */
+  async deleteSnippet(id) {
+    const snippetsDir = path.join(this.storageRoot, "snippets");
+    const filePath = path.join(snippetsDir, `${id}.json`);
+    try {
+      await fs.unlink(filePath);
+    } catch (error) {
+      if (error.code === "ENOENT") throw new Error("SNIPPET_NOT_FOUND");
+      throw new Error("DELETE_ERROR");
+    }
+  }
+  /**
+   * Search snippets by keyword and tags
+   * @param {string} query - Search term
+   * @param {object} tagFilters - { language: [], usage: [], module: [] }
+   * @returns {Promise<Array>} Matching snippets
+   */
+  async searchSnippets(query, tagFilters = {}) {
+    const all = await this.listSnippets();
+    let results = all;
+    if (query && query.trim()) {
+      const q = query.trim().toLowerCase();
+      results = results.filter(
+        (snippet) => snippet.title.toLowerCase().includes(q) || snippet.description.toLowerCase().includes(q) || snippet.code.toLowerCase().includes(q)
+      );
+    }
+    for (const cat of ["language", "usage", "module"]) {
+      if (tagFilters[cat] && tagFilters[cat].length) {
+        results = results.filter(
+          (snippet) => tagFilters[cat].every((tag) => (snippet.tags[cat] || []).includes(tag.toLowerCase()))
+        );
+      }
+    }
+    results.sort((a, b) => (b.modifiedAt || "").localeCompare(a.modifiedAt || "") || (b.createdAt || "").localeCompare(a.createdAt || ""));
+    return results;
+  }
   constructor() {
     this.storageRoot = null;
     this.configPath = null;
@@ -101,7 +263,7 @@ class FileService {
     try {
       await this.ensureDirectoryExists(path.dirname(this.configPath));
       await fs.writeFile(this.configPath, JSON.stringify(config, null, 2), "utf-8");
-    } catch (error) {
+    } catch {
       throw new Error("WRITE_ERROR");
     }
   }
@@ -159,7 +321,7 @@ class FileService {
         }
       }
       return notes;
-    } catch (error) {
+    } catch {
       return [];
     }
   }
@@ -266,7 +428,7 @@ ${yamlLines.join("\n")}
 
 ${note.content}`;
       await fs.writeFile(filePath, content, "utf-8");
-    } catch (error) {
+    } catch {
       throw new Error("WRITE_ERROR");
     }
   }
@@ -366,7 +528,7 @@ ${note.content}`;
     try {
       await this.ensureDirectoryExists(path.dirname(filePath));
       await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
-    } catch (error) {
+    } catch {
       throw new Error("WRITE_ERROR");
     }
   }
@@ -379,7 +541,7 @@ ${note.content}`;
     const notesDir = path.join(this.storageRoot, "notes", folderName);
     try {
       await this.ensureDirectoryExists(notesDir);
-    } catch (error) {
+    } catch {
       throw new Error("FOLDER_CREATE_ERROR");
     }
   }
@@ -393,8 +555,8 @@ ${note.content}`;
     const newPath = path.join(this.storageRoot, "notes", newName);
     try {
       await fs.rename(oldPath, newPath);
-    } catch (error) {
-      if (error.code === "ENOENT") {
+    } catch (err) {
+      if (err.code === "ENOENT") {
         throw new Error("FOLDER_NOT_FOUND");
       }
       throw new Error("FOLDER_RENAME_ERROR");
@@ -408,7 +570,7 @@ ${note.content}`;
     const folderPath = path.join(this.storageRoot, "notes", folderName);
     try {
       await fs.rm(folderPath, { recursive: true, force: true });
-    } catch (error) {
+    } catch {
       throw new Error("FOLDER_DELETE_ERROR");
     }
   }
@@ -604,6 +766,54 @@ app.on("window-all-closed", () => {
 });
 function setupIpcHandlers() {
   ipcMain.handle("config.get", async () => {
+    ipcMain.handle("snippets.list", async () => {
+      try {
+        const snippets = await fileService.listSnippets();
+        return { success: true, data: snippets };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+    ipcMain.handle("snippets.get", async (_event, id) => {
+      try {
+        const snippet = await fileService.getSnippet(id);
+        return { success: true, data: snippet };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+    ipcMain.handle("snippets.create", async (_event, snippetData) => {
+      try {
+        const snippet = await fileService.createSnippet(snippetData);
+        return { success: true, data: snippet };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+    ipcMain.handle("snippets.update", async (_event, id, updates) => {
+      try {
+        const snippet = await fileService.updateSnippet(id, updates);
+        return { success: true, data: snippet };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+    ipcMain.handle("snippets.delete", async (_event, id) => {
+      try {
+        await fileService.deleteSnippet(id);
+        return { success: true, data: { deleted: true } };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+    ipcMain.handle("snippets.search", async (_event, query, tagFilters) => {
+      try {
+        const results = await fileService.searchSnippets(query, tagFilters);
+        return { success: true, data: results };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
     try {
       const config = await configService.getConfig();
       if (!config) {
@@ -1015,6 +1225,194 @@ function setupIpcHandlers() {
       data.projects.splice(projectIndex, 1);
       await fileService.writeJSON("projects.json", data);
       return { success: true, data: { deleted: true } };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+  ipcMain.handle("milestones.list", async (_event, projectId) => {
+    try {
+      const data = await fileService.readJSON("milestones.json");
+      let milestones = data?.milestones || [];
+      if (projectId) {
+        milestones = milestones.filter((m) => m.projectId === projectId);
+      }
+      milestones.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+      return { success: true, data: milestones };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+  ipcMain.handle("milestones.create", async (_event, milestoneData) => {
+    try {
+      const data = await fileService.readJSON("milestones.json") || { milestones: [] };
+      const now = (/* @__PURE__ */ new Date()).toISOString();
+      const newMilestone = {
+        id: fileService.generateId(),
+        projectId: milestoneData.projectId,
+        title: milestoneData.title,
+        description: milestoneData.description || "",
+        deadline: milestoneData.deadline,
+        completed: false,
+        completedAt: null,
+        createdAt: now,
+        modifiedAt: now
+      };
+      data.milestones.push(newMilestone);
+      await fileService.writeJSON("milestones.json", data);
+      return { success: true, data: newMilestone };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+  ipcMain.handle("milestones.update", async (_event, { id, updates }) => {
+    try {
+      const data = await fileService.readJSON("milestones.json");
+      if (!data || !data.milestones) {
+        return { success: false, error: "MILESTONE_NOT_FOUND" };
+      }
+      const milestoneIndex = data.milestones.findIndex((m) => m.id === id);
+      if (milestoneIndex === -1) {
+        return { success: false, error: "MILESTONE_NOT_FOUND" };
+      }
+      data.milestones[milestoneIndex] = {
+        ...data.milestones[milestoneIndex],
+        ...updates,
+        modifiedAt: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      await fileService.writeJSON("milestones.json", data);
+      return { success: true, data: data.milestones[milestoneIndex] };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+  ipcMain.handle("milestones.toggleComplete", async (_event, id) => {
+    try {
+      const data = await fileService.readJSON("milestones.json");
+      if (!data || !data.milestones) {
+        return { success: false, error: "MILESTONE_NOT_FOUND" };
+      }
+      const milestoneIndex = data.milestones.findIndex((m) => m.id === id);
+      if (milestoneIndex === -1) {
+        return { success: false, error: "MILESTONE_NOT_FOUND" };
+      }
+      const milestone = data.milestones[milestoneIndex];
+      milestone.completed = !milestone.completed;
+      milestone.completedAt = milestone.completed ? (/* @__PURE__ */ new Date()).toISOString() : null;
+      milestone.modifiedAt = (/* @__PURE__ */ new Date()).toISOString();
+      await fileService.writeJSON("milestones.json", data);
+      return { success: true, data: milestone };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+  ipcMain.handle("milestones.delete", async (_event, id) => {
+    try {
+      const data = await fileService.readJSON("milestones.json");
+      if (!data || !data.milestones) {
+        return { success: false, error: "MILESTONE_NOT_FOUND" };
+      }
+      const milestoneIndex = data.milestones.findIndex((m) => m.id === id);
+      if (milestoneIndex === -1) {
+        return { success: false, error: "MILESTONE_NOT_FOUND" };
+      }
+      data.milestones.splice(milestoneIndex, 1);
+      await fileService.writeJSON("milestones.json", data);
+      return { success: true, data: { deleted: true } };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+  ipcMain.handle("tools.list", async () => {
+    try {
+      const data = await fileService.readJSON("tools.json");
+      const tools = data?.tools || [];
+      tools.sort((a, b) => {
+        if (a.category !== b.category) {
+          return (a.category || "").localeCompare(b.category || "");
+        }
+        return a.name.localeCompare(b.name);
+      });
+      return { success: true, data: tools };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+  ipcMain.handle("tools.create", async (_event, toolData) => {
+    try {
+      const data = await fileService.readJSON("tools.json") || { tools: [] };
+      const now = (/* @__PURE__ */ new Date()).toISOString();
+      const newTool = {
+        id: fileService.generateId(),
+        name: toolData.name,
+        description: toolData.description || "",
+        launchPath: toolData.launchPath,
+        launchType: toolData.launchType || "application",
+        category: toolData.category || "General",
+        createdAt: now,
+        modifiedAt: now
+      };
+      data.tools.push(newTool);
+      await fileService.writeJSON("tools.json", data);
+      return { success: true, data: newTool };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+  ipcMain.handle("tools.update", async (_event, { id, updates }) => {
+    try {
+      const data = await fileService.readJSON("tools.json");
+      if (!data || !data.tools) {
+        return { success: false, error: "TOOL_NOT_FOUND" };
+      }
+      const toolIndex = data.tools.findIndex((t) => t.id === id);
+      if (toolIndex === -1) {
+        return { success: false, error: "TOOL_NOT_FOUND" };
+      }
+      data.tools[toolIndex] = {
+        ...data.tools[toolIndex],
+        ...updates,
+        modifiedAt: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      await fileService.writeJSON("tools.json", data);
+      return { success: true, data: data.tools[toolIndex] };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+  ipcMain.handle("tools.delete", async (_event, id) => {
+    try {
+      const data = await fileService.readJSON("tools.json");
+      if (!data || !data.tools) {
+        return { success: false, error: "TOOL_NOT_FOUND" };
+      }
+      const toolIndex = data.tools.findIndex((t) => t.id === id);
+      if (toolIndex === -1) {
+        return { success: false, error: "TOOL_NOT_FOUND" };
+      }
+      data.tools.splice(toolIndex, 1);
+      await fileService.writeJSON("tools.json", data);
+      return { success: true, data: { deleted: true } };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+  ipcMain.handle("tools.launch", async (_event, id) => {
+    try {
+      const data = await fileService.readJSON("tools.json");
+      if (!data || !data.tools) {
+        return { success: false, error: "TOOL_NOT_FOUND" };
+      }
+      const tool = data.tools.find((t) => t.id === id);
+      if (!tool) {
+        return { success: false, error: "TOOL_NOT_FOUND" };
+      }
+      const { shell } = await import("electron");
+      if (tool.launchType === "url") {
+        await shell.openExternal(tool.launchPath);
+      } else {
+        await shell.openPath(tool.launchPath);
+      }
+      return { success: true, data: { launched: true } };
     } catch (error) {
       return { success: false, error: error.message };
     }

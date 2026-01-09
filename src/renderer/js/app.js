@@ -35,7 +35,7 @@ function mountNavigation() {
   const nav = document.createElement('div');
   nav.className = 'navigation';
 
-  ['#/notes', '#/todos', '#/projects', '#/snippets', '#/tools'].forEach((route) => {
+  ['#/notes', '#/todos', '#/projects', '#/roadmaps', '#/snippets', '#/tools'].forEach((route) => {
     const button = document.createElement('button');
     button.type = 'button';
     button.textContent = route.replace('#/', '').replace(/\b\w/g, l => l.toUpperCase());
@@ -107,6 +107,49 @@ function setupKeyboardShortcuts() {
       e.preventDefault();
       if (todosComponent) {
         todosComponent.togglePanel();
+      }
+    }
+
+    // Ctrl+N: New note (when on notes page)
+    if (e.ctrlKey && e.key === 'n') {
+      e.preventDefault();
+      const newNoteBtn = document.querySelector('#new-note-btn, .btn-icon[title="New Note"]');
+      if (newNoteBtn) {
+        newNoteBtn.click();
+      } else if (window.location.hash !== '#/notes') {
+        window.location.hash = '#/notes';
+      }
+    }
+
+    // Ctrl+S: Save current note
+    if (e.ctrlKey && e.key === 's') {
+      e.preventDefault();
+      const saveBtn = document.querySelector('#save-note-btn, .btn-primary[type="submit"]');
+      if (saveBtn && !saveBtn.disabled) {
+        saveBtn.click();
+      }
+    }
+
+    // Ctrl+F: Focus search (notes or snippets)
+    if (e.ctrlKey && e.key === 'f') {
+      e.preventDefault();
+      const searchInput = document.querySelector('#snippet-search, #note-search, input[type="search"]');
+      if (searchInput) {
+        searchInput.focus();
+        searchInput.select();
+      }
+    }
+
+    // Escape: Close modals
+    if (e.key === 'Escape') {
+      const modal = document.querySelector('.modal[style*="display: block"], .modal:not([style*="display: none"]):not([style="display:none;"])');
+      if (modal) {
+        const cancelBtn = modal.querySelector('[id*="cancel"], .btn-secondary');
+        if (cancelBtn) {
+          cancelBtn.click();
+        } else {
+          modal.style.display = 'none';
+        }
       }
     }
   });
