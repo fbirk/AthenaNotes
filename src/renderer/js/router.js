@@ -23,8 +23,7 @@ const routes = new Map([
   ['#/todos', (container) => {
     const todosComponent = new TodosComponent();
     container.innerHTML = '';
-    const panel = todosComponent.renderPinnedPanel();
-    container.appendChild(panel);
+    todosComponent.renderMainView(container);
     return todosComponent;
   }],
   ['#/projects', async (container) => {

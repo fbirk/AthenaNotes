@@ -7,6 +7,7 @@ export class TodosComponent {
   constructor() {
     this.todos = [];
     this.collapsed = localStorage.getItem('todosPanelCollapsed') === 'true';
+    this.selectedTodo = null;
   }
 
   /**
@@ -55,6 +56,44 @@ export class TodosComponent {
     return panel;
   }
 
+  // Sidebar + detail main view for todos
+  renderMainView(container) {
+    container.innerHTML = `
+      <div class="todos-container">
+        <div class="todos-sidebar">
+          <div class="todos-header">
+            <h2>Todos</h2>
+            <button type="button" class="btn-icon" id="add-todo-btn" title="Add todo">+</button>
+          </div>
+          <div class="todos-list" id="todos-list">
+            <div class="loading">Loading todos...</div>
+          </div>
+        </div>
+        <div class="todos-main">
+          <div id="todo-detail-container"></div>
+        </div>
+      </div>
+      <div class="todo-form" id="todo-form" style="display: none;">
+        <input type="text" id="todo-title-input" placeholder="Todo title" maxlength="200" />
+        <textarea id="todo-description-input" placeholder="Description (optional)" rows="2"></textarea>
+        <div class="todo-form-controls">
+          <select id="todo-priority-select">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+          <input type="datetime-local" id="todo-deadline-input" />
+        </div>
+        <div class="todo-form-actions">
+          <button type="button" class="btn-secondary btn-small" id="cancel-todo-btn">Cancel</button>
+          <button type="button" class="btn-primary btn-small" id="save-todo-btn">Save</button>
+        </div>
+      </div>
+    `;
+    this.loadTodos();
+    this.attachMainEventListeners(container);
+  }
+
   /**
    * Attach event listeners to the panel
    * @param {HTMLElement} panel - Panel element
@@ -82,6 +121,22 @@ export class TodosComponent {
     }
   }
 
+  // Attach main event listeners for sidebar/detail
+  attachMainEventListeners(container) {
+    const addBtn = container.querySelector('#add-todo-btn');
+    const cancelBtn = container.querySelector('#cancel-todo-btn');
+    const saveBtn = container.querySelector('#save-todo-btn');
+    if (addBtn) {
+      addBtn.addEventListener('click', () => this.showTodoForm());
+    }
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => this.hideTodoForm());
+    }
+    if (saveBtn) {
+      saveBtn.addEventListener('click', () => this.saveTodo());
+    }
+  }
+
   /**
    * Load todos from backend
    */
@@ -91,7 +146,11 @@ export class TodosComponent {
 
       if (result.success) {
         this.todos = result.data;
+        if (this.selectedTodo) {
+          this.selectedTodo = this.todos.find(t => t.id === this.selectedTodo.id) || null;
+        }
         this.renderTodosList();
+        this.renderTodoDetail();
       }
     } catch (error) {
       console.error('Error loading todos:', error);
@@ -103,31 +162,39 @@ export class TodosComponent {
    */
   renderTodosList() {
     const listContainer = document.getElementById('todos-list');
-    if (!listContainer) return;
-
+    console.log('[Todos] renderTodosList todos:', this.todos);
+    if (!listContainer) {
+      console.warn('[Todos] #todos-list not found in DOM');
+      return;
+    }
     if (this.todos.length === 0) {
       listContainer.innerHTML = '<div class="todos-empty">No todos yet</div>';
       return;
     }
 
     listContainer.innerHTML = this.todos.map(todo => `
-      <div class="todo-item ${todo.completed ? 'completed' : ''}" data-todo-id="${todo.id}">
+      <div class="todo-item ${todo.completed ? 'completed' : ''} ${this.selectedTodo && this.selectedTodo.id === todo.id ? 'active' : ''}" data-todo-id="${todo.id}">
         <input 
           type="checkbox" 
           class="todo-checkbox" 
           ${todo.completed ? 'checked' : ''}
           data-todo-id="${todo.id}"
         />
-        <div class="todo-content">
-          <div class="todo-title ${todo.completed ? 'strikethrough' : ''}">
-            ${this.escapeHtml(todo.title)}
-            <span class="todo-priority priority-${todo.priority}">${todo.priority}</span>
-          </div>
-          ${todo.deadline ? `<div class="todo-deadline">${this.formatDeadline(todo.deadline)}</div>` : ''}
-        </div>
-        <button type="button" class="btn-icon-tiny todo-delete" data-todo-id="${todo.id}" title="Delete">×</button>
+        <span class="todo-title ${todo.completed ? 'strikethrough' : ''}">${this.escapeHtml(todo.title)}</span>
+        <span class="todo-priority priority-${todo.priority}">${todo.priority}</span>
+        <button type="button" class="btn-icon-tiny todo-delete" data-todo-id="${todo.id}" title="Delete">\u00d7</button>
       </div>
     `).join('');
+
+    // Attach event listeners for selection
+    listContainer.querySelectorAll('.todo-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('todo-delete') && !e.target.classList.contains('todo-checkbox')) {
+          const todoId = item.dataset.todoId;
+          this.selectTodo(todoId);
+        }
+      });
+    });
 
     // Attach event listeners to todo items
     listContainer.querySelectorAll('.todo-checkbox').forEach(checkbox => {
@@ -141,6 +208,37 @@ export class TodosComponent {
         this.deleteTodo(e.target.dataset.todoId);
       });
     });
+  }
+
+  selectTodo(todoId) {
+    this.selectedTodo = this.todos.find(t => t.id === todoId);
+    this.renderTodoDetail();
+    this.renderTodosList();
+  }
+
+  renderTodoDetail() {
+    const detailContainer = document.getElementById('todo-detail-container');
+    if (!detailContainer) return;
+    if (!this.selectedTodo) {
+      detailContainer.innerHTML = `<div class="empty-state-content"><h3>No todo selected</h3><p>Select a todo from the list or create a new one.</p></div>`;
+      return;
+    }
+    const todo = this.selectedTodo;
+    detailContainer.innerHTML = `
+      <div class="todo-detail">
+        <h2 class="todo-detail-title ${todo.completed ? 'strikethrough' : ''}">${this.escapeHtml(todo.title)}</h2>
+        <div class="todo-detail-meta">
+          <span class="todo-detail-priority priority-${todo.priority}">${todo.priority}</span>
+          ${todo.deadline ? `<span class="todo-detail-deadline">${this.formatDeadline(todo.deadline)}</span>` : ''}
+        </div>
+        <div class="todo-detail-description">${this.escapeHtml(todo.description || '')}</div>
+        <div class="todo-detail-actions">
+          <button type="button" class="btn-secondary" id="edit-todo-btn">Edit</button>
+          <button type="button" class="btn-danger" id="delete-todo-btn">Delete</button>
+        </div>
+      </div>
+    `;
+    // TODO: Add edit/delete logic
   }
 
   /**

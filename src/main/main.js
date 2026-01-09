@@ -1,12 +1,45 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { configService } from './services/config-service.js';
-import { fileService } from './services/file-service.js';
+
+// Do not import configService/fileService until after devStoragePath is set and initialized
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const isDev = Boolean(process.env.VITE_DEV_SERVER_URL);
+
+// Preconfigured dev storage location (from .dev-storage.json if present)
+import fs from 'node:fs';
+let devStoragePath = null;
+if (isDev) {
+  try {
+    // Try workspace root and main.js directory
+    const candidatePaths = [
+      path.resolve(process.cwd(), '.dev-storage.json'),
+      path.join(__dirname, '../../.dev-storage.json')
+    ];
+    let foundPath = null;
+    for (const candidate of candidatePaths) {
+      console.log('Checking for dev storage config at:', candidate);
+      if (fs.existsSync(candidate)) {
+        foundPath = candidate;
+        break;
+      }
+    }
+    if (foundPath) {
+      const raw = fs.readFileSync(foundPath, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (parsed.devStoragePath) {
+        devStoragePath = parsed.devStoragePath;
+        console.log('Loaded devStoragePath from:', foundPath);
+      }
+    } else {
+      console.warn('No .dev-storage.json found in expected locations.');
+    }
+  } catch (e) {
+    console.warn('Could not read .dev-storage.json:', e);
+  }
+}
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -35,7 +68,35 @@ function createWindow() {
   }
 }
 
-app.whenReady().then(() => {
+
+
+app.whenReady().then(async () => {
+  if (isDev) {
+    console.log('[DEV MODE]');
+    console.log('Resolved devStoragePath:', devStoragePath);
+  }
+  let fileService, configService;
+  if (isDev && devStoragePath) {
+    console.log('Initializing fileService/configService with devStoragePath:', devStoragePath);
+    // Dynamically import and initialize with dev path
+    fileService = (await import('./services/file-service.js')).fileService;
+    configService = (await import('./services/config-service.js')).configService;
+    await fileService.initialize(devStoragePath);
+    try {
+      await fileService.readConfig();
+    } catch (e) {
+      await fileService.createInitialConfig(devStoragePath);
+    }
+  } else {
+    // Normal import
+    fileService = (await import('./services/file-service.js')).fileService;
+    configService = (await import('./services/config-service.js')).configService;
+  }
+
+  // Attach to global for IPC handlers
+  global.fileService = fileService;
+  global.configService = configService;
+
   setupIpcHandlers();
   createWindow();
 
@@ -55,6 +116,48 @@ app.on('window-all-closed', () => {
 // ==================== IPC Handlers ====================
 
 function setupIpcHandlers() {
+  // Remove previous handlers to avoid duplicate registration in dev/hot reload
+  ipcMain.removeHandler('config.get');
+  ipcMain.removeHandler('snippets.list');
+  ipcMain.removeHandler('snippets.get');
+  ipcMain.removeHandler('snippets.create');
+  ipcMain.removeHandler('snippets.update');
+  ipcMain.removeHandler('snippets.delete');
+  ipcMain.removeHandler('snippets.search');
+  ipcMain.removeHandler('config.update');
+  ipcMain.removeHandler('config.setStorageLocation');
+  ipcMain.removeHandler('fs.selectFolder');
+  ipcMain.removeHandler('fs.validatePath');
+  ipcMain.removeHandler('notes.list');
+  ipcMain.removeHandler('notes.get');
+  ipcMain.removeHandler('notes.create');
+  ipcMain.removeHandler('notes.update');
+  ipcMain.removeHandler('notes.delete');
+  ipcMain.removeHandler('notes.search');
+  ipcMain.removeHandler('todos.list');
+  ipcMain.removeHandler('todos.create');
+  ipcMain.removeHandler('todos.update');
+  ipcMain.removeHandler('todos.toggleComplete');
+  ipcMain.removeHandler('todos.delete');
+  ipcMain.removeHandler('projects.list');
+  ipcMain.removeHandler('projects.get');
+  ipcMain.removeHandler('projects.create');
+  ipcMain.removeHandler('projects.update');
+  ipcMain.removeHandler('projects.delete');
+  ipcMain.removeHandler('milestones.list');
+  ipcMain.removeHandler('milestones.create');
+  ipcMain.removeHandler('milestones.update');
+  ipcMain.removeHandler('milestones.toggleComplete');
+  ipcMain.removeHandler('milestones.delete');
+  ipcMain.removeHandler('tools.list');
+  ipcMain.removeHandler('tools.create');
+  ipcMain.removeHandler('tools.update');
+  ipcMain.removeHandler('tools.delete');
+  ipcMain.removeHandler('tools.launch');
+
+  // Use global.fileService/configService for all handlers
+  const fileService = global.fileService;
+  const configService = global.configService;
   // Configuration API
   ipcMain.handle('config.get', async () => {
   // ==================== Snippet API ====================
