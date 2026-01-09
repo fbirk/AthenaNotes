@@ -577,9 +577,14 @@ export class NotesComponent {
    */
   updateSaveButton() {
     const saveBtn = document.getElementById('save-note-btn');
+    const titleInput = document.getElementById('note-title');
     if (!saveBtn) return;
 
-    saveBtn.disabled = !this.hasUnsavedChanges;
+    // Enable Save when there's a non-empty title. This allows saving edits
+    // even if auto-save cleared the unsaved flag, and avoids blocking users
+    // when they open an existing note.
+    const hasTitle = !!titleInput && titleInput.value.trim().length > 0;
+    saveBtn.disabled = !hasTitle;
   }
 
   /**

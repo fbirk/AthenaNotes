@@ -14,7 +14,7 @@ export async function renderSnippetsComponent(container) {
   container.innerHTML = `<div class="snippets-section">
     <div class="snippets-header">
       <h2>Code Snippets</h2>
-      <button id="add-snippet-btn">+ New Snippet</button>
+      <button id="add-snippet-btn" class="btn-primary">+ New Snippet</button>
       <input id="snippet-search" type="text" placeholder="Search snippets..." />
     </div>
     <div class="snippets-filters">
@@ -119,7 +119,9 @@ function escapeHtml(str) {
 
 
 async function showSnippetForm(id) {
-  let snippet = id ? snippets.find(s => s.id === id) : {
+  // Prefer search results (most up-to-date), fall back to cached list
+  const sourceList = lastSearchResults.length ? lastSearchResults : snippets;
+  let snippet = id ? sourceList.find(s => s.id === id) : {
     title: '', description: '', language: '', code: '', tags: { language: [], usage: [], module: [] }
   };
   const modal = document.getElementById('snippet-form-modal');
@@ -141,8 +143,8 @@ async function showSnippetForm(id) {
           <input name="tags-module" placeholder="Module" value="${(snippet.tags.module||[]).join(', ')}" />
         </div>
         <div class="modal-actions">
-          <button type="submit">${id ? 'Update' : 'Create'}</button>
-          <button type="button" id="cancel-snippet-form">Cancel</button>
+          <button type="submit" class="btn-primary">${id ? 'Update' : 'Create'}</button>
+          <button type="button" id="cancel-snippet-form" class="btn-secondary">Cancel</button>
         </div>
       </form>
     </div>

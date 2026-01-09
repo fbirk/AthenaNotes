@@ -265,7 +265,10 @@ export class ProjectsComponent {
       }
     });
 
-    modal.querySelector('.modal-close').addEventListener('click', () => modal.remove());
+    // Bind all close controls (header X and Cancel button)
+    modal.querySelectorAll('.modal-close').forEach(btn => {
+      btn.addEventListener('click', () => modal.remove());
+    });
     modal.addEventListener('click', (e) => {
       if (e.target === modal) modal.remove();
     });
@@ -316,7 +319,10 @@ export class ProjectsComponent {
       }
     });
 
-    modal.querySelector('.modal-close').addEventListener('click', () => modal.remove());
+    // Bind all close controls (header X and Cancel button)
+    modal.querySelectorAll('.modal-close').forEach(btn => {
+      btn.addEventListener('click', () => modal.remove());
+    });
     modal.addEventListener('click', (e) => {
       if (e.target === modal) modal.remove();
     });
@@ -466,11 +472,11 @@ export class ProjectsComponent {
           </div>
           <div class="form-group">
             <label for="project-description">Description</label>
-            <textarea id="project-description" rows="4" maxlength="500">${project ? this.escapeHtml(project.description) : ''}</textarea>
+            <textarea id="project-description" rows="4" maxlength="500">${project ? this.escapeHtml(project.description || '') : ''}</textarea>
           </div>
           <div class="modal-actions">
-            <button type="button" class="btn-secondary modal-close">Cancel</button>
-            <button type="submit" class="btn-primary">${project ? 'Update' : 'Create'}</button>
+          <button type="submit" class="btn-primary">${project ? 'Update' : 'Create'}</button>
+          <button type="button" class="btn-secondary modal-close">Cancel</button>
           </div>
         </form>
       </div>

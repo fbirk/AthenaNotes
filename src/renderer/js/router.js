@@ -4,6 +4,7 @@ import { ProjectsComponent } from './components/projects.js';
 import { renderSnippetsComponent } from './components/snippets.js';
 import { renderRoadmapsComponent } from './components/roadmaps.js';
 import { renderToolsComponent } from './components/tools.js';
+import { TodosComponent } from './components/todos.js';
 
 // Store active component instance
 let activeComponent = null;
@@ -19,7 +20,13 @@ const routes = new Map([
     notesComponent.render(container);
     return notesComponent;
   }],
-  ['#/todos', () => '<div class="placeholder-panel">Todos UI coming soon.</div>'],
+  ['#/todos', (container) => {
+    const todosComponent = new TodosComponent();
+    container.innerHTML = '';
+    const panel = todosComponent.renderPinnedPanel();
+    container.appendChild(panel);
+    return todosComponent;
+  }],
   ['#/projects', async (container) => {
     const projectsComponent = new ProjectsComponent();
     container.innerHTML = await projectsComponent.render();

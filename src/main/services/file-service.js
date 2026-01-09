@@ -73,7 +73,7 @@ class FileService {
       if (!snippetData.language || !snippetData.language.trim()) throw new Error('VALIDATION_ERROR');
       if (!snippetData.code || !snippetData.code.trim()) throw new Error('VALIDATION_ERROR');
       if (!snippetData.tags || typeof snippetData.tags !== 'object') throw new Error('VALIDATION_ERROR');
-      if (!Object.values(snippetData.tags).flat().length) throw new Error('VALIDATION_ERROR');
+      // Allow empty tags (usage/module/language tags optional)
 
       const now = new Date().toISOString();
       const id = uuidv4();
