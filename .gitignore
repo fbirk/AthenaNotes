@@ -33,3 +33,4 @@ tests/e2e/playwright-report/
 # IDE
 .vscode/
 .idea/
+.claude/settings.local.json
