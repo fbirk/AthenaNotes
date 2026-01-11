@@ -1,10 +1,10 @@
 import { initRouter } from './router.js';
 import { createAppState } from './state.js';
-import { TodosComponent } from './components/todos.js';
+import { TodosPinnedHeader } from './components/todos-pinned-header.js';
 
 const state = createAppState();
 let isInitialized = false;
-let todosComponent = null;
+let todosPinnedHeader = null;
 
 /**
  * Check if the application is initialized (has configuration)
@@ -72,6 +72,11 @@ export async function bootstrap() {
   // Initialize router
   initRouter(state);
 
+  // Listen for route changes to update pinned header visibility
+  window.addEventListener('hashchange', () => {
+    updateTodosPinnedHeaderVisibility();
+  });
+
   // Listen for setup completion
   window.addEventListener('setup-complete', async () => {
     isInitialized = true;
@@ -82,19 +87,32 @@ export async function bootstrap() {
 }
 
 /**
- * Mount the todos panel
+ * Mount the todos pinned header panel
  */
 function mountTodosPanel() {
   const container = document.getElementById('todos-panel-container');
   if (!container) return;
 
-  // Remove existing panel if any
-  container.innerHTML = '';
+  // Create and mount new pinned header
+  todosPinnedHeader = new TodosPinnedHeader();
+  todosPinnedHeader.render(container);
 
-  // Create and mount new panel
-  todosComponent = new TodosComponent();
-  const panel = todosComponent.renderPinnedPanel();
-  container.appendChild(panel);
+  // Initial visibility check
+  updateTodosPinnedHeaderVisibility();
+}
+
+/**
+ * Update todos pinned header visibility based on current route
+ */
+function updateTodosPinnedHeaderVisibility() {
+  if (!todosPinnedHeader) return;
+
+  const hash = window.location.hash || '#/notes';
+  if (hash === '#/todos') {
+    todosPinnedHeader.hide();
+  } else {
+    todosPinnedHeader.show();
+  }
 }
 
 /**
@@ -102,11 +120,11 @@ function mountTodosPanel() {
  */
 function setupKeyboardShortcuts() {
   document.addEventListener('keydown', (e) => {
-    // Ctrl+T: Toggle todos panel
+    // Ctrl+T: Toggle todos pinned header panel
     if (e.ctrlKey && e.key === 't') {
       e.preventDefault();
-      if (todosComponent) {
-        todosComponent.togglePanel();
+      if (todosPinnedHeader && window.location.hash !== '#/todos') {
+        todosPinnedHeader.togglePanel();
       }
     }
 

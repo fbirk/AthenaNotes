@@ -4,7 +4,7 @@ import { ProjectsComponent } from './components/projects.js';
 import { renderSnippetsComponent } from './components/snippets.js';
 import { renderRoadmapsComponent } from './components/roadmaps.js';
 import { renderToolsComponent } from './components/tools.js';
-import { TodosComponent } from './components/todos.js';
+import { TodosSection } from './components/todos-section.js';
 
 // Store active component instance
 let activeComponent = null;
@@ -21,10 +21,9 @@ const routes = new Map([
     return notesComponent;
   }],
   ['#/todos', (container) => {
-    const todosComponent = new TodosComponent();
-    container.innerHTML = '';
-    todosComponent.renderMainView(container);
-    return todosComponent;
+    const todosSection = new TodosSection();
+    todosSection.render(container);
+    return todosSection;
   }],
   ['#/projects', async (container) => {
     const projectsComponent = new ProjectsComponent();

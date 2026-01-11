@@ -37,7 +37,8 @@ Main Process (Node.js)              Renderer Process (Browser)
                                     │   └── markdown.js
                                     ├── js/components/
                                     │   ├── notes.js
-                                    │   ├── todos.js
+                                    │   ├── todos-pinned-header.js  # Header panel (hidden on #/todos)
+                                    │   ├── todos-section.js        # Main todos view
                                     │   ├── projects.js
                                     │   ├── snippets.js
                                     │   ├── roadmaps.js
