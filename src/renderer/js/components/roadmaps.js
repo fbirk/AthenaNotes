@@ -6,6 +6,7 @@ import { invoke } from '../services/api.js';
 
 let projects = [];
 let milestones = [];
+let todos = [];
 let selectedProjectId = null;
 
 export async function renderRoadmapsComponent(container) {
@@ -24,6 +25,7 @@ export async function renderRoadmapsComponent(container) {
 
   await loadProjects();
   await loadMilestones();
+  await loadTodos();
   renderProjectFilter();
   renderRoadmapSummary();
   setupEventListeners();
@@ -37,6 +39,12 @@ async function loadProjects() {
 async function loadMilestones(projectId = null) {
   const res = await invoke('milestones.list', projectId);
   milestones = res.success ? res.data : [];
+}
+
+async function loadTodos() {
+  const res = await invoke('todos.list');
+  // Filter only todos that have a projectId (tagged with a project)
+  todos = res.success ? res.data.filter(t => t.projectId) : [];
 }
 
 function renderProjectFilter() {
@@ -79,8 +87,24 @@ function renderRoadmapSummary() {
 function renderProjectRoadmap(project, projectMilestones) {
   if (!project) return '';
 
-  const completedCount = projectMilestones.filter(m => m.completed).length;
-  const totalCount = projectMilestones.length;
+  // Get todos tagged with this project
+  const projectTodos = todos.filter(t => t.projectId === project.id);
+
+  // Combine milestones and todos into a unified timeline
+  const timelineItems = [
+    ...projectMilestones.map(m => ({ ...m, type: 'milestone' })),
+    ...projectTodos.map(t => ({ ...t, type: 'todo', title: t.title, description: t.description }))
+  ];
+
+  // Sort by deadline/date (items with deadlines first, then by deadline date)
+  timelineItems.sort((a, b) => {
+    const aDate = a.deadline ? new Date(a.deadline) : new Date('9999-12-31');
+    const bDate = b.deadline ? new Date(b.deadline) : new Date('9999-12-31');
+    return aDate - bDate;
+  });
+
+  const completedCount = timelineItems.filter(item => item.completed).length;
+  const totalCount = timelineItems.length;
   const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   return `
@@ -97,9 +121,9 @@ function renderProjectRoadmap(project, projectMilestones) {
         <span class="progress-text">${completedCount}/${totalCount} completed</span>
       </div>
       <div class="milestone-timeline">
-        ${projectMilestones.length > 0
-          ? projectMilestones.map(m => renderMilestone(m)).join('')
-          : '<div class="empty-milestones">No milestones yet</div>'
+        ${timelineItems.length > 0
+          ? timelineItems.map(item => item.type === 'milestone' ? renderMilestone(item) : renderTodoAsMilestone(item)).join('')
+          : '<div class="empty-milestones">No milestones or todos yet</div>'
         }
       </div>
     </div>
@@ -130,6 +154,33 @@ function renderMilestone(milestone) {
   `;
 }
 
+function renderTodoAsMilestone(todo) {
+  const hasDeadline = todo.deadline && todo.deadline !== '';
+  const isOverdue = hasDeadline && !todo.completed && new Date(todo.deadline) < new Date();
+  const deadlineDate = hasDeadline ? new Date(todo.deadline).toLocaleDateString() : 'No deadline';
+
+  return `
+    <div class="milestone-item todo-milestone ${todo.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" data-todo-id="${todo.id}">
+      <div class="milestone-marker">
+        <input type="checkbox" class="todo-milestone-checkbox" ${todo.completed ? 'checked' : ''} data-id="${todo.id}" />
+      </div>
+      <div class="milestone-content">
+        <div class="milestone-header">
+          <span class="milestone-title ${todo.completed ? 'strikethrough' : ''}">
+            ${todo.title}
+            <span class="milestone-type-badge todo-badge">Todo</span>
+          </span>
+          <span class="milestone-deadline ${isOverdue ? 'overdue' : ''}">${deadlineDate}</span>
+        </div>
+        ${todo.description ? `<p class="milestone-description">${todo.description}</p>` : ''}
+      </div>
+      <div class="milestone-actions">
+        <span class="todo-priority-badge priority-${todo.priority}">${todo.priority}</span>
+      </div>
+    </div>
+  `;
+}
+
 function setupEventListeners() {
   const projectFilter = document.getElementById('roadmap-project-filter');
   if (projectFilter) {
@@ -153,6 +204,17 @@ function attachMilestoneEventListeners() {
       await invoke('milestones.toggleComplete', checkbox.dataset.id);
       await loadMilestones(selectedProjectId);
       renderRoadmapSummary();
+    };
+  });
+
+  // Todo milestone checkboxes
+  document.querySelectorAll('.todo-milestone-checkbox').forEach(checkbox => {
+    checkbox.onchange = async () => {
+      await invoke('todos.toggleComplete', checkbox.dataset.id);
+      await loadTodos();
+      renderRoadmapSummary();
+      // Notify other components that todos changed
+      window.dispatchEvent(new CustomEvent('todos-changed'));
     };
   });
 

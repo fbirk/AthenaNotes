@@ -1550,6 +1550,49 @@
   font-style: italic;
 }
 
+/* Todo milestone styling in roadmaps */
+.todo-milestone {
+  border-left: 2px solid var(--color-accent);
+}
+
+.milestone-type-badge {
+  font-size: 0.65rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  margin-left: 0.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.todo-badge {
+  background: rgba(100, 149, 237, 0.2);
+  color: var(--color-accent);
+}
+
+.todo-priority-badge {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.todo-priority-badge.priority-high {
+  background: rgba(220, 53, 69, 0.2);
+  color: #dc3545;
+}
+
+.todo-priority-badge.priority-medium {
+  background: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+}
+
+.todo-priority-badge.priority-low {
+  background: rgba(108, 117, 125, 0.2);
+  color: #6c757d;
+}
+
 .milestone-form {
   background: var(--color-surface-alt);
   border-radius: 8px;
@@ -1837,4 +1880,35 @@
   color: var(--color-muted);
   padding: 3rem 0;
 }
+/* Todo item content wrapper for title + project tag */
+.todo-item-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+/* Project tag on todo items */
+.todo-project-tag {
+  font-size: 0.7rem;
+  color: var(--color-accent);
+  background: rgba(100, 149, 237, 0.15);
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: fit-content;
+}
+
+/* Project indicator in todo detail */
+.todo-detail-project {
+  font-size: 0.9rem;
+  color: var(--color-accent);
+  background: rgba(100, 149, 237, 0.15);
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+}
+
 /* --- END TODOS SIDEBAR/DETAIL --- */

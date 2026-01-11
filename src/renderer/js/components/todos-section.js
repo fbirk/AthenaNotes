@@ -7,6 +7,7 @@
 export class TodosSection {
   constructor() {
     this.todos = [];
+    this.projects = [];
     this.selectedTodo = null;
     this.container = null;
     this.editingTodo = null;
@@ -58,6 +59,12 @@ export class TodosSection {
               </select>
             </div>
             <div class="form-group">
+              <label for="section-todo-project-select">Project (optional)</label>
+              <select id="section-todo-project-select">
+                <option value="">No Project</option>
+              </select>
+            </div>
+            <div class="form-group">
               <label for="section-todo-deadline-input">Deadline</label>
               <input type="datetime-local" id="section-todo-deadline-input" />
             </div>
@@ -71,6 +78,7 @@ export class TodosSection {
     `;
 
     this.setupEventListeners();
+    this.loadProjects();
     this.loadTodos();
 
     // Listen for changes from other components
@@ -82,6 +90,20 @@ export class TodosSection {
    */
   onTodosChanged() {
     this.loadTodos();
+  }
+
+  /**
+   * Load projects from backend
+   */
+  async loadProjects() {
+    try {
+      const result = await window.knowledgeBase.invoke('projects.list');
+      if (result.success) {
+        this.projects = result.data;
+      }
+    } catch (error) {
+      console.error('Error loading projects:', error);
+    }
   }
 
   /**
@@ -153,19 +175,25 @@ export class TodosSection {
       return;
     }
 
-    listContainer.innerHTML = this.todos.map(todo => `
-      <div class="todo-item ${todo.completed ? 'completed' : ''} ${this.selectedTodo && this.selectedTodo.id === todo.id ? 'active' : ''}" data-todo-id="${todo.id}">
-        <input
-          type="checkbox"
-          class="todo-checkbox"
-          ${todo.completed ? 'checked' : ''}
-          data-todo-id="${todo.id}"
-        />
-        <span class="todo-title ${todo.completed ? 'strikethrough' : ''}">${this.escapeHtml(todo.title)}</span>
-        <span class="todo-priority priority-${todo.priority}">${todo.priority}</span>
-        <button type="button" class="btn-icon-tiny todo-delete" data-todo-id="${todo.id}" title="Delete">\u00d7</button>
-      </div>
-    `).join('');
+    listContainer.innerHTML = this.todos.map(todo => {
+      const project = todo.projectId ? this.projects.find(p => p.id === todo.projectId) : null;
+      return `
+        <div class="todo-item ${todo.completed ? 'completed' : ''} ${this.selectedTodo && this.selectedTodo.id === todo.id ? 'active' : ''}" data-todo-id="${todo.id}">
+          <input
+            type="checkbox"
+            class="todo-checkbox"
+            ${todo.completed ? 'checked' : ''}
+            data-todo-id="${todo.id}"
+          />
+          <div class="todo-item-content">
+            <span class="todo-title ${todo.completed ? 'strikethrough' : ''}">${this.escapeHtml(todo.title)}</span>
+            ${project ? `<span class="todo-project-tag">${this.escapeHtml(project.name)}</span>` : ''}
+          </div>
+          <span class="todo-priority priority-${todo.priority}">${todo.priority}</span>
+          <button type="button" class="btn-icon-tiny todo-delete" data-todo-id="${todo.id}" title="Delete">\u00d7</button>
+        </div>
+      `;
+    }).join('');
 
     // Attach event listeners for selection
     listContainer.querySelectorAll('.todo-item').forEach(item => {
@@ -222,11 +250,13 @@ export class TodosSection {
     }
 
     const todo = this.selectedTodo;
+    const project = todo.projectId ? this.projects.find(p => p.id === todo.projectId) : null;
     detailContainer.innerHTML = `
       <div class="todo-detail">
         <h2 class="todo-detail-title ${todo.completed ? 'strikethrough' : ''}">${this.escapeHtml(todo.title)}</h2>
         <div class="todo-detail-meta">
           <span class="todo-detail-priority priority-${todo.priority}">${todo.priority}</span>
+          ${project ? `<span class="todo-detail-project">${this.escapeHtml(project.name)}</span>` : ''}
           ${todo.deadline ? `<span class="todo-detail-deadline">${this.formatDeadline(todo.deadline)}</span>` : ''}
         </div>
         ${todo.description ? `<div class="todo-detail-description">${this.escapeHtml(todo.description)}</div>` : ''}
@@ -260,6 +290,7 @@ export class TodosSection {
     const titleInput = document.getElementById('section-todo-title-input');
     const descInput = document.getElementById('section-todo-description-input');
     const prioritySelect = document.getElementById('section-todo-priority-select');
+    const projectSelect = document.getElementById('section-todo-project-select');
     const deadlineInput = document.getElementById('section-todo-deadline-input');
 
     this.editingTodo = todo;
@@ -278,6 +309,13 @@ export class TodosSection {
 
     if (prioritySelect) {
       prioritySelect.value = todo ? todo.priority : 'medium';
+    }
+
+    // Populate project dropdown
+    if (projectSelect) {
+      projectSelect.innerHTML = '<option value="">No Project</option>' +
+        this.projects.map(p => `<option value="${p.id}">${this.escapeHtml(p.name)}</option>`).join('');
+      projectSelect.value = todo && todo.projectId ? todo.projectId : '';
     }
 
     if (deadlineInput) {
@@ -311,6 +349,7 @@ export class TodosSection {
     const titleInput = document.getElementById('section-todo-title-input');
     const descInput = document.getElementById('section-todo-description-input');
     const prioritySelect = document.getElementById('section-todo-priority-select');
+    const projectSelect = document.getElementById('section-todo-project-select');
     const deadlineInput = document.getElementById('section-todo-deadline-input');
 
     if (!titleInput) return;
@@ -326,6 +365,7 @@ export class TodosSection {
         title,
         description: descInput?.value || '',
         priority: prioritySelect?.value || 'medium',
+        projectId: projectSelect?.value || null,
         deadline: deadlineInput?.value || null,
       };
 

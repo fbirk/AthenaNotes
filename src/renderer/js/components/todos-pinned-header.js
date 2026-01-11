@@ -7,6 +7,7 @@
 export class TodosPinnedHeader {
   constructor() {
     this.todos = [];
+    this.projects = [];
     this.collapsed = localStorage.getItem('todosPanelCollapsed') === 'true';
     this.container = null;
     this.boundOnTodosChanged = this.onTodosChanged.bind(this);
@@ -44,6 +45,11 @@ export class TodosPinnedHeader {
               <option value="medium" selected>Medium</option>
               <option value="high">High</option>
             </select>
+            <select id="pinned-todo-project-select">
+              <option value="">No Project</option>
+            </select>
+          </div>
+          <div class="todo-form-controls">
             <input type="datetime-local" id="pinned-todo-deadline-input" />
           </div>
           <div class="todo-form-actions">
@@ -58,6 +64,7 @@ export class TodosPinnedHeader {
     container.appendChild(panel);
 
     this.setupEventListeners();
+    this.loadProjects();
     this.loadTodos();
 
     // Listen for changes from other components
@@ -69,6 +76,20 @@ export class TodosPinnedHeader {
    */
   onTodosChanged() {
     this.loadTodos();
+  }
+
+  /**
+   * Load projects from backend
+   */
+  async loadProjects() {
+    try {
+      const result = await window.knowledgeBase.invoke('projects.list');
+      if (result.success) {
+        this.projects = result.data;
+      }
+    } catch (error) {
+      console.error('Error loading projects:', error);
+    }
   }
 
   /**
@@ -125,19 +146,25 @@ export class TodosPinnedHeader {
       return;
     }
 
-    listContainer.innerHTML = this.todos.map(todo => `
-      <div class="todo-item ${todo.completed ? 'completed' : ''}" data-todo-id="${todo.id}">
-        <input
-          type="checkbox"
-          class="todo-checkbox"
-          ${todo.completed ? 'checked' : ''}
-          data-todo-id="${todo.id}"
-        />
-        <span class="todo-title ${todo.completed ? 'strikethrough' : ''}">${this.escapeHtml(todo.title)}</span>
-        <span class="todo-priority priority-${todo.priority}">${todo.priority}</span>
-        <button type="button" class="btn-icon-tiny todo-delete" data-todo-id="${todo.id}" title="Delete">\u00d7</button>
-      </div>
-    `).join('');
+    listContainer.innerHTML = this.todos.map(todo => {
+      const project = todo.projectId ? this.projects.find(p => p.id === todo.projectId) : null;
+      return `
+        <div class="todo-item ${todo.completed ? 'completed' : ''}" data-todo-id="${todo.id}">
+          <input
+            type="checkbox"
+            class="todo-checkbox"
+            ${todo.completed ? 'checked' : ''}
+            data-todo-id="${todo.id}"
+          />
+          <div class="todo-item-content">
+            <span class="todo-title ${todo.completed ? 'strikethrough' : ''}">${this.escapeHtml(todo.title)}</span>
+            ${project ? `<span class="todo-project-tag">${this.escapeHtml(project.name)}</span>` : ''}
+          </div>
+          <span class="todo-priority priority-${todo.priority}">${todo.priority}</span>
+          <button type="button" class="btn-icon-tiny todo-delete" data-todo-id="${todo.id}" title="Delete">\u00d7</button>
+        </div>
+      `;
+    }).join('');
 
     // Attach event listeners to todo items
     listContainer.querySelectorAll('.todo-checkbox').forEach(checkbox => {
@@ -180,9 +207,16 @@ export class TodosPinnedHeader {
   showTodoForm() {
     const form = document.getElementById('pinned-todo-form');
     const list = document.getElementById('pinned-todos-list');
+    const projectSelect = document.getElementById('pinned-todo-project-select');
 
     if (form) form.style.display = 'block';
     if (list) list.style.display = 'none';
+
+    // Populate project dropdown
+    if (projectSelect) {
+      projectSelect.innerHTML = '<option value="">No Project</option>' +
+        this.projects.map(p => `<option value="${p.id}">${this.escapeHtml(p.name)}</option>`).join('');
+    }
 
     const titleInput = document.getElementById('pinned-todo-title-input');
     if (titleInput) titleInput.focus();
@@ -202,11 +236,13 @@ export class TodosPinnedHeader {
     const titleInput = document.getElementById('pinned-todo-title-input');
     const descInput = document.getElementById('pinned-todo-description-input');
     const prioritySelect = document.getElementById('pinned-todo-priority-select');
+    const projectSelect = document.getElementById('pinned-todo-project-select');
     const deadlineInput = document.getElementById('pinned-todo-deadline-input');
 
     if (titleInput) titleInput.value = '';
     if (descInput) descInput.value = '';
     if (prioritySelect) prioritySelect.value = 'medium';
+    if (projectSelect) projectSelect.value = '';
     if (deadlineInput) deadlineInput.value = '';
   }
 
@@ -217,6 +253,7 @@ export class TodosPinnedHeader {
     const titleInput = document.getElementById('pinned-todo-title-input');
     const descInput = document.getElementById('pinned-todo-description-input');
     const prioritySelect = document.getElementById('pinned-todo-priority-select');
+    const projectSelect = document.getElementById('pinned-todo-project-select');
     const deadlineInput = document.getElementById('pinned-todo-deadline-input');
 
     if (!titleInput) return;
@@ -232,6 +269,7 @@ export class TodosPinnedHeader {
         title,
         description: descInput?.value || '',
         priority: prioritySelect?.value || 'medium',
+        projectId: projectSelect?.value || null,
         deadline: deadlineInput?.value || null,
       };
 
