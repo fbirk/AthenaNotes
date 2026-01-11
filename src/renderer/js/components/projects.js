@@ -17,19 +17,19 @@ export class ProjectsComponent {
     await this.loadProjects();
 
     return `
-      <div class="projects-container">
-        <div class="projects-sidebar">
-          <div class="projects-header">
+      <div class="section-container">
+        <div class="section-sidebar">
+          <div class="section-header">
             <h2>Projects</h2>
             <button class="btn-icon" id="btn-create-project" title="Create Project">
               <span>+</span>
             </button>
           </div>
-          <div class="projects-list" id="projects-list">
+          <div class="section-list" id="projects-list">
             ${this.renderProjectsList()}
           </div>
         </div>
-        <div class="projects-main">
+        <div class="section-main">
           ${this.view === 'list' ? this.renderWelcome() : this.renderProjectDetail()}
         </div>
       </div>
@@ -41,21 +41,18 @@ export class ProjectsComponent {
    */
   renderProjectsList() {
     if (this.projects.length === 0) {
-      return '<p class="empty-state">No projects yet. Create one to get started!</p>';
+      return '<div class="section-list-empty">No projects yet. Create one to get started!</div>';
     }
 
     return this.projects
       .map(
         project => `
-      <div class="project-item ${this.selectedProject?.id === project.id ? 'selected' : ''}" 
+      <div class="section-item ${this.selectedProject?.id === project.id ? 'active' : ''}"
            data-project-id="${project.id}">
-        <div class="project-info">
-          <div class="project-name">${this.escapeHtml(project.name)}</div>
-          <div class="project-description">${this.escapeHtml(project.description || '')}</div>
+        <div class="section-item-content">
+          <div class="section-item-title">${this.escapeHtml(project.name)}</div>
+          <div class="section-item-meta">${this.escapeHtml(project.description || '')}</div>
         </div>
-        <button class="btn-icon btn-delete-project" data-project-id="${project.id}" title="Delete Project">
-          <span>×</span>
-        </button>
       </div>
     `
       )
@@ -67,10 +64,11 @@ export class ProjectsComponent {
    */
   renderWelcome() {
     return `
-      <div class="projects-welcome">
-        <h3>Organize Your Knowledge</h3>
-        <p>Create projects to organize your notes, todos, and roadmaps by topic or initiative.</p>
-        <button class="btn-primary" id="btn-create-project-main">Create Your First Project</button>
+      <div class="section-empty">
+        <div class="empty-state-content">
+          <h3>No project selected</h3>
+          <p>Select a project from the list or create a new one.</p>
+        </div>
       </div>
     `;
   }
@@ -87,25 +85,27 @@ export class ProjectsComponent {
     const notes = project.notes || [];
 
     return `
-      <div class="project-detail">
-        <div class="project-detail-header">
+      <div class="section-detail">
+        <div class="section-detail-header">
           <div>
             <h2>${this.escapeHtml(project.name)}</h2>
-            <p class="project-detail-description">${this.escapeHtml(project.description || '')}</p>
+            <div class="section-detail-meta">${this.escapeHtml(project.description || '')}</div>
           </div>
-          <div class="project-actions">
+          <div class="section-detail-actions">
             <button class="btn-secondary" id="btn-edit-project">Edit</button>
             <button class="btn-danger" id="btn-delete-project-detail">Delete</button>
           </div>
         </div>
-        
-        <div class="project-notes">
-          <div class="project-notes-header">
-            <h3>Notes (${notes.length})</h3>
-            <button class="btn-primary" id="btn-create-note-in-project">+ New Note</button>
-          </div>
-          <div class="notes-list" id="project-notes-list">
-            ${this.renderProjectNotes(notes)}
+
+        <div class="section-detail-body">
+          <div class="section-detail-section">
+            <div class="section-detail-section-header">
+              <h3>Notes (${notes.length})</h3>
+              <button class="btn-secondary" id="btn-create-note-in-project">+ New Note</button>
+            </div>
+            <div class="section-detail-list" id="project-notes-list">
+              ${this.renderProjectNotes(notes)}
+            </div>
           </div>
         </div>
       </div>
@@ -117,17 +117,15 @@ export class ProjectsComponent {
    */
   renderProjectNotes(notes) {
     if (notes.length === 0) {
-      return '<p class="empty-state">No notes in this project yet.</p>';
+      return '<div class="section-list-empty">No notes in this project yet.</div>';
     }
 
     return notes
       .map(
         note => `
-      <div class="note-item" data-note-id="${note.id}">
-        <div class="note-info">
-          <div class="note-title">${this.escapeHtml(note.title)}</div>
-          <div class="note-meta">Modified ${this.formatDate(note.modifiedAt)}</div>
-        </div>
+      <div class="section-detail-list-item" data-note-id="${note.id}">
+        <div class="section-item-title">${this.escapeHtml(note.title)}</div>
+        <div class="section-item-meta">Modified ${this.formatDate(note.modifiedAt)}</div>
       </div>
     `
       )
@@ -138,36 +136,18 @@ export class ProjectsComponent {
    * Setup event listeners
    */
   setupEventListeners() {
-    // Create project buttons
+    // Create project button
     const btnCreate = document.getElementById('btn-create-project');
-    const btnCreateMain = document.getElementById('btn-create-project-main');
-    
     if (btnCreate) {
       btnCreate.addEventListener('click', () => this.showCreateProjectDialog());
     }
-    
-    if (btnCreateMain) {
-      btnCreateMain.addEventListener('click', () => this.showCreateProjectDialog());
-    }
 
     // Project list items
-    const projectItems = document.querySelectorAll('.project-item');
+    const projectItems = document.querySelectorAll('#projects-list .section-item');
     projectItems.forEach(item => {
-      item.addEventListener('click', e => {
-        if (!e.target.closest('.btn-delete-project')) {
-          const projectId = item.dataset.projectId;
-          this.selectProject(projectId);
-        }
-      });
-    });
-
-    // Delete project buttons (list view)
-    const btnDeletes = document.querySelectorAll('.btn-delete-project');
-    btnDeletes.forEach(btn => {
-      btn.addEventListener('click', e => {
-        e.stopPropagation();
-        const projectId = btn.dataset.projectId;
-        this.deleteProject(projectId);
+      item.addEventListener('click', () => {
+        const projectId = item.dataset.projectId;
+        this.selectProject(projectId);
       });
     });
 
@@ -199,7 +179,7 @@ export class ProjectsComponent {
     }
 
     // Note items (navigate to note)
-    const noteItems = document.querySelectorAll('.note-item');
+    const noteItems = document.querySelectorAll('.section-detail-list-item');
     noteItems.forEach(item => {
       item.addEventListener('click', () => {
         const noteId = item.dataset.noteId;

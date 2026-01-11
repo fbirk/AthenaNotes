@@ -11,6 +11,7 @@ export class TodosSection {
     this.selectedTodo = null;
     this.container = null;
     this.editingTodo = null;
+    this.filter = 'all';
     this.boundOnTodosChanged = this.onTodosChanged.bind(this);
   }
 
@@ -21,17 +22,24 @@ export class TodosSection {
   render(container) {
     this.container = container;
     container.innerHTML = `
-      <div class="todos-container">
-        <div class="todos-sidebar">
-          <div class="todos-header">
+      <div class="section-container">
+        <div class="section-sidebar">
+          <div class="section-header">
             <h2>Todos</h2>
             <button type="button" class="btn-icon" id="section-add-todo-btn" title="Add todo">+</button>
           </div>
-          <div class="todos-list" id="section-todos-list">
+          <div class="section-controls">
+            <select id="section-todo-filter" class="section-filter">
+              <option value="all">All Todos</option>
+              <option value="active">Active</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+          <div class="section-list" id="section-todos-list">
             <div class="loading">Loading todos...</div>
           </div>
         </div>
-        <div class="todos-main">
+        <div class="section-main">
           <div id="section-todo-detail-container"></div>
         </div>
       </div>
@@ -115,6 +123,7 @@ export class TodosSection {
     const saveBtn = document.getElementById('section-save-todo-btn');
     const closeBtn = document.getElementById('section-modal-close');
     const modal = document.getElementById('section-todo-modal');
+    const filterSelect = document.getElementById('section-todo-filter');
 
     if (addBtn) {
       addBtn.addEventListener('click', () => this.showModal());
@@ -130,6 +139,13 @@ export class TodosSection {
 
     if (saveBtn) {
       saveBtn.addEventListener('click', () => this.saveTodo());
+    }
+
+    if (filterSelect) {
+      filterSelect.addEventListener('change', (e) => {
+        this.filter = e.target.value;
+        this.renderTodosList();
+      });
     }
 
     // Close modal on backdrop click
@@ -164,41 +180,58 @@ export class TodosSection {
   }
 
   /**
+   * Get filtered todos based on current filter
+   */
+  getFilteredTodos() {
+    switch (this.filter) {
+      case 'active':
+        return this.todos.filter(t => !t.completed);
+      case 'completed':
+        return this.todos.filter(t => t.completed);
+      default:
+        return this.todos;
+    }
+  }
+
+  /**
    * Render the todos list in sidebar
    */
   renderTodosList() {
     const listContainer = document.getElementById('section-todos-list');
     if (!listContainer) return;
 
-    if (this.todos.length === 0) {
-      listContainer.innerHTML = '<div class="todos-empty">No todos yet. Create one to get started!</div>';
+    const filteredTodos = this.getFilteredTodos();
+
+    if (filteredTodos.length === 0) {
+      listContainer.innerHTML = '<div class="section-list-empty">No todos yet. Create one to get started!</div>';
       return;
     }
 
-    listContainer.innerHTML = this.todos.map(todo => {
+    listContainer.innerHTML = filteredTodos.map(todo => {
       const project = todo.projectId ? this.projects.find(p => p.id === todo.projectId) : null;
       return `
-        <div class="todo-item ${todo.completed ? 'completed' : ''} ${this.selectedTodo && this.selectedTodo.id === todo.id ? 'active' : ''}" data-todo-id="${todo.id}">
+        <div class="section-item ${this.selectedTodo && this.selectedTodo.id === todo.id ? 'active' : ''}" data-todo-id="${todo.id}">
           <input
             type="checkbox"
-            class="todo-checkbox"
+            class="section-item-checkbox"
             ${todo.completed ? 'checked' : ''}
             data-todo-id="${todo.id}"
           />
-          <div class="todo-item-content">
-            <span class="todo-title ${todo.completed ? 'strikethrough' : ''}">${this.escapeHtml(todo.title)}</span>
-            ${project ? `<span class="todo-project-tag">${this.escapeHtml(project.name)}</span>` : ''}
+          <div class="section-item-content">
+            <div class="section-item-title ${todo.completed ? 'strikethrough' : ''}">${this.escapeHtml(todo.title)}</div>
+            <div class="section-item-meta">
+              ${project ? `<span class="section-item-tag">${this.escapeHtml(project.name)}</span>` : ''}
+              <span class="section-item-priority priority-${todo.priority}">${todo.priority}</span>
+            </div>
           </div>
-          <span class="todo-priority priority-${todo.priority}">${todo.priority}</span>
-          <button type="button" class="btn-icon-tiny todo-delete" data-todo-id="${todo.id}" title="Delete">\u00d7</button>
         </div>
       `;
     }).join('');
 
     // Attach event listeners for selection
-    listContainer.querySelectorAll('.todo-item').forEach(item => {
+    listContainer.querySelectorAll('.section-item').forEach(item => {
       item.addEventListener('click', (e) => {
-        if (!e.target.classList.contains('todo-delete') && !e.target.classList.contains('todo-checkbox')) {
+        if (!e.target.classList.contains('section-item-checkbox')) {
           const todoId = item.dataset.todoId;
           this.selectTodo(todoId);
         }
@@ -206,18 +239,10 @@ export class TodosSection {
     });
 
     // Attach event listeners for checkboxes
-    listContainer.querySelectorAll('.todo-checkbox').forEach(checkbox => {
+    listContainer.querySelectorAll('.section-item-checkbox').forEach(checkbox => {
       checkbox.addEventListener('change', (e) => {
         e.stopPropagation();
         this.toggleTodo(e.target.dataset.todoId);
-      });
-    });
-
-    // Attach event listeners for delete buttons
-    listContainer.querySelectorAll('.todo-delete').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.deleteTodo(e.target.dataset.todoId);
       });
     });
   }
@@ -241,9 +266,11 @@ export class TodosSection {
 
     if (!this.selectedTodo) {
       detailContainer.innerHTML = `
-        <div class="empty-state-content">
-          <h3>No todo selected</h3>
-          <p>Select a todo from the list or create a new one.</p>
+        <div class="section-empty">
+          <div class="empty-state-content">
+            <h3>No todo selected</h3>
+            <p>Select a todo from the list or create a new one.</p>
+          </div>
         </div>
       `;
       return;
@@ -252,18 +279,22 @@ export class TodosSection {
     const todo = this.selectedTodo;
     const project = todo.projectId ? this.projects.find(p => p.id === todo.projectId) : null;
     detailContainer.innerHTML = `
-      <div class="todo-detail">
-        <h2 class="todo-detail-title ${todo.completed ? 'strikethrough' : ''}">${this.escapeHtml(todo.title)}</h2>
-        <div class="todo-detail-meta">
-          <span class="todo-detail-priority priority-${todo.priority}">${todo.priority}</span>
-          ${project ? `<span class="todo-detail-project">${this.escapeHtml(project.name)}</span>` : ''}
-          ${todo.deadline ? `<span class="todo-detail-deadline">${this.formatDeadline(todo.deadline)}</span>` : ''}
+      <div class="section-detail">
+        <div class="section-detail-header">
+          <div>
+            <h2 class="${todo.completed ? 'strikethrough' : ''}">${this.escapeHtml(todo.title)}</h2>
+            <div class="section-detail-meta">
+              <span class="section-detail-priority priority-${todo.priority}">${todo.priority}</span>
+              ${project ? `<span class="section-detail-tag">${this.escapeHtml(project.name)}</span>` : ''}
+              ${todo.deadline ? `<span class="section-detail-date">${this.formatDeadline(todo.deadline)}</span>` : ''}
+            </div>
+          </div>
+          <div class="section-detail-actions">
+            <button type="button" class="btn-secondary" id="section-edit-todo-btn">Edit</button>
+            <button type="button" class="btn-danger" id="section-delete-todo-btn">Delete</button>
+          </div>
         </div>
-        ${todo.description ? `<div class="todo-detail-description">${this.escapeHtml(todo.description)}</div>` : ''}
-        <div class="todo-detail-actions">
-          <button type="button" class="btn-secondary" id="section-edit-todo-btn">Edit</button>
-          <button type="button" class="btn-danger" id="section-delete-todo-btn">Delete</button>
-        </div>
+        ${todo.description ? `<div class="section-detail-body">${this.escapeHtml(todo.description)}</div>` : ''}
       </div>
     `;
 

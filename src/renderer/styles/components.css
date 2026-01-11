@@ -443,8 +443,10 @@
   font-size: 0.875rem;
 }
 
-/* ==================== Notes Component ==================== */
+/* ==================== Common Section Styles ==================== */
+/* Used by Notes, Todos, and Projects sections */
 
+.section-container,
 .notes-container {
   display: flex;
   height: 100%;
@@ -452,6 +454,7 @@
   overflow: hidden;
 }
 
+.section-sidebar,
 .notes-sidebar {
   width: 300px;
   min-width: 300px;
@@ -461,6 +464,7 @@
   background: var(--color-surface);
 }
 
+.section-header,
 .notes-header {
   padding: 1rem;
   border-bottom: 1px solid var(--color-border);
@@ -469,11 +473,272 @@
   align-items: center;
 }
 
+.section-header h2,
 .notes-header h2 {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
 }
+
+.section-controls,
+.notes-controls {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.section-filter {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.section-list,
+.notes-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.section-list-empty,
+.notes-list-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--color-muted);
+}
+
+.section-item {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.section-item:hover {
+  background: var(--color-surface-alt);
+}
+
+.section-item.active {
+  background: var(--color-accent);
+  color: white;
+}
+
+.section-item.active .section-item-meta,
+.section-item.active .section-item-tag,
+.section-item.active .section-item-priority {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.section-item-checkbox {
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.section-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.section-item-title {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.section-item-meta {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.section-item-tag {
+  font-size: 0.7rem;
+  color: var(--color-accent);
+  background: rgba(100, 149, 237, 0.15);
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+}
+
+.section-item.active .section-item-tag {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.section-item-priority {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  text-transform: capitalize;
+}
+
+.section-item-priority.priority-high {
+  background: rgba(220, 53, 69, 0.2);
+  color: #dc3545;
+}
+
+.section-item-priority.priority-medium {
+  background: rgba(255, 193, 7, 0.2);
+  color: #d4a500;
+}
+
+.section-item-priority.priority-low {
+  background: rgba(108, 117, 125, 0.2);
+  color: #6c757d;
+}
+
+.section-item.active .section-item-priority {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.section-detail-priority.priority-high {
+  background: rgba(220, 53, 69, 0.2);
+  color: #dc3545;
+}
+
+.section-detail-priority.priority-medium {
+  background: rgba(255, 193, 7, 0.2);
+  color: #d4a500;
+}
+
+.section-detail-priority.priority-low {
+  background: rgba(108, 117, 125, 0.2);
+  color: #6c757d;
+}
+
+.section-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.section-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.section-detail {
+  padding: 2rem;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.section-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.section-detail-header h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.section-detail-meta {
+  font-size: 0.875rem;
+  color: var(--color-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.section-detail-tag {
+  font-size: 0.875rem;
+  color: var(--color-accent);
+  background: rgba(100, 149, 237, 0.15);
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+}
+
+.section-detail-priority {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+.section-detail-date {
+  font-size: 0.875rem;
+  color: var(--color-muted);
+}
+
+.section-detail-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.section-detail-body {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-text);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.section-detail-section {
+  margin-top: 2rem;
+}
+
+.section-detail-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.section-detail-section-header h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.section-detail-list {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.section-detail-list-item {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.section-detail-list-item:last-child {
+  border-bottom: none;
+}
+
+.section-detail-list-item:hover {
+  background: var(--color-surface-alt);
+}
+
+/* ==================== Notes Component ==================== */
 
 .btn-icon {
   background: var(--color-accent);
@@ -578,16 +843,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.empty-state-content {
-  text-align: center;
-  color: var(--color-muted);
-}
-
-.empty-state-content h3 {
-  margin-bottom: 0.5rem;
-  color: var(--color-text);
 }
 
 .notes-editor-container {
@@ -1085,175 +1340,6 @@
   display: flex;
   gap: 0.5rem;
   justify-content: flex-end;
-}
-
-/* ==================== Projects Component ==================== */
-
-.projects-container {
-  display: flex;
-  height: 100%;
-  gap: 1.5rem;
-}
-
-.projects-sidebar {
-  width: 300px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid var(--color-border);
-  padding-right: 1.5rem;
-}
-
-.projects-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-
-.projects-header h2 {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.projects-list {
-  flex: 1;
-  overflow-y: auto;
-}
-
-.project-item {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.project-item:hover {
-  background: var(--color-surface-alt);
-  border-color: var(--color-accent);
-}
-
-.project-item.selected {
-  background: var(--color-accent);
-  color: white;
-  border-color: var(--color-accent);
-}
-
-.project-item.selected .project-description {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.project-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.project-name {
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-}
-
-.project-description {
-  font-size: 0.875rem;
-  color: var(--color-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.btn-delete-project {
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.project-item:hover .btn-delete-project {
-  opacity: 1;
-}
-
-.projects-main {
-  flex: 1;
-  overflow-y: auto;
-  padding-left: 1.5rem;
-}
-
-.projects-welcome {
-  text-align: center;
-  padding: 4rem 2rem;
-}
-
-.projects-welcome h3 {
-  font-size: 1.75rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-}
-
-.projects-welcome p {
-  color: var(--color-muted);
-  font-size: 1.125rem;
-  margin-bottom: 2rem;
-  line-height: 1.6;
-}
-
-.project-detail {
-  padding: 1rem 0;
-}
-
-.project-detail-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.project-detail-header h2 {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-
-.project-detail-description {
-  color: var(--color-muted);
-  font-size: 1.125rem;
-  line-height: 1.6;
-}
-
-.project-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.project-notes {
-  margin-top: 2rem;
-}
-
-.project-notes-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.project-notes-header h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-/* Reuse existing note-item styles from notes component */
-.project-detail .note-item {
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.project-detail .note-item:hover {
-  background-color: var(--color-surface-alt);
 }
 
 /* ==================== Modal Dialog ==================== */
@@ -1760,155 +1846,20 @@
   opacity: 0.9;
 }
 
-/* --- TODOS SIDEBAR/DETAIL LAYOUT --- */
-.todos-container {
-  display: flex;
-  height: 100%;
-  min-height: 400px;
-}
-.todos-sidebar {
-  width: 320px;
-  min-width: 220px;
-  background: var(--color-surface-alt);
-  border-right: 1px solid var(--color-border);
-  display: flex;
-  flex-direction: column;
-  padding: 0.5rem 0.5rem 0.5rem 0.75rem;
-}
-.todos-container .todos-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-  padding: 0.5rem 0;
-  border-bottom: none;
-  background: transparent;
-  cursor: default;
-}
-.todos-container .todos-header h2 {
-  font-size: 1.3rem;
-  font-weight: 600;
-  margin: 0;
-}
-.todos-sidebar .todos-list {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-right: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-.todos-sidebar .todo-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.5rem;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.15s;
-  min-width: 0;
-  max-width: none;
-  margin-bottom: 0;
-  background: transparent;
-}
-.todos-sidebar .todo-item.active {
-  background: var(--color-surface);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-}
-.todos-sidebar .todo-item:hover {
-  background: var(--color-surface);
-}
-.todos-sidebar .todo-title {
-  flex: 1;
-  font-weight: 500;
-  font-size: 1em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.todos-sidebar .todo-priority {
-  font-size: 0.75em;
-  margin-left: 0.5em;
-  padding: 0.15em 0.5em;
-  border-radius: 4px;
-  background: var(--color-border);
-}
-.priority-low { color: #50fa7b; }
-.priority-medium { color: #ffb86c; }
-.priority-high { color: #ff5555; }
-
-.todos-main {
-  flex: 1;
-  padding: 2rem 2.5rem;
-  background: var(--color-surface);
-  min-width: 0;
-}
-.todo-detail {
-  max-width: 600px;
-  margin: 0 auto;
-  background: var(--color-surface-alt);
-  border-radius: 10px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-  padding: 2rem 2.5rem;
-}
-.todo-detail-title {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-.todo-detail-meta {
-  display: flex;
-  gap: 1.5rem;
-  margin-bottom: 1rem;
-  font-size: 1.1rem;
-}
-.todo-detail-description {
-  color: var(--color-muted);
-  font-size: 1.15rem;
-  margin-bottom: 2rem;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  white-space: pre-wrap;
-}
-.todo-detail-actions {
-  display: flex;
-  gap: 1rem;
-}
+/* Legacy empty state content - still used */
 .empty-state-content {
   text-align: center;
   color: var(--color-muted);
   padding: 3rem 0;
 }
-/* Todo item content wrapper for title + project tag */
-.todo-item-content {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
+
+.empty-state-content h3 {
+  margin-bottom: 0.5rem;
+  color: var(--color-text);
 }
 
-/* Project tag on todo items */
-.todo-project-tag {
-  font-size: 0.7rem;
-  color: var(--color-accent);
-  background: rgba(100, 149, 237, 0.15);
-  padding: 0.1rem 0.4rem;
-  border-radius: 3px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: fit-content;
+/* Common strikethrough for completed items */
+.strikethrough {
+  text-decoration: line-through;
+  opacity: 0.7;
 }
-
-/* Project indicator in todo detail */
-.todo-detail-project {
-  font-size: 0.9rem;
-  color: var(--color-accent);
-  background: rgba(100, 149, 237, 0.15);
-  padding: 0.25rem 0.75rem;
-  border-radius: 4px;
-}
-
-/* --- END TODOS SIDEBAR/DETAIL --- */

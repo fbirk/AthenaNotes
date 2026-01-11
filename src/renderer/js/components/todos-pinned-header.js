@@ -28,7 +28,6 @@ export class TodosPinnedHeader {
       <div class="todos-header">
         <h3>Todos</h3>
         <div class="todos-header-actions">
-          <button type="button" class="btn-icon-small" id="pinned-add-todo-btn" title="Add todo">+</button>
           <button type="button" class="btn-icon-small" id="toggle-todos-btn" title="Toggle panel">${this.collapsed ? '+' : '−'}</button>
         </div>
       </div>
