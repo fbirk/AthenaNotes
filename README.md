@@ -1,6 +1,7 @@
-# KnowledgeBase
+# Athena Notes
 
-![KnowledgeBase Banner](docs/Welcome-Screen.jpg)
+<img src="docs/Welcome-Screen.jpg" width="400">
+
 
 A modern, cross-platform developer knowledge base and productivity suite. Organize notes, code snippets, todos, projects, and tools—all in one beautiful desktop app.
 
@@ -13,8 +14,8 @@ A modern, cross-platform developer knowledge base and productivity suite. Organi
 - **Todos**: Persistent, prioritized todo panel with deadlines and project association.
 - **Projects**: Group notes, todos, and roadmaps by initiative. Edit, rename, and manage projects easily.
 - **Tools Launcher**: Quick-launch for your favorite apps and URLs, categorized for easy access.
-- **Roadmaps & Milestones**: Plan and track progress with visual timelines (coming soon).
-- **Beautiful UI**: Responsive, themeable interface with modern design and smooth interactions.
+- **Roadmaps & Milestones**: Plan and track progress with visual timelines.
+- **Beautiful UI**: Responsive interface with modern design and smooth interactions.
 - **Electron + Vite**: Fast startup, hot reload, and native desktop experience.
 
 ---
@@ -28,8 +29,8 @@ A modern, cross-platform developer knowledge base and productivity suite. Organi
 ### Installation
 ```bash
 # Clone the repository
-$ git clone https://github.com/yourusername/KnowledgeBase.git
-$ cd KnowledgeBase
+$ git clone https://github.com/fbirk/AthenaNotes.git
+$ cd AthenaNotes
 
 # Install dependencies
 $ npm install
@@ -47,6 +48,7 @@ $ npm run dev
 
 ## 🛠️ Usage
 
+- **Storage**: Upon startup, select the folder on your local file system to store all application data (notes, todos, etc.)
 - **Create Notes**: Click the + button in Notes. Write in Markdown, link to other notes, and assign to projects.
 - **Add Snippets**: Go to Snippets, click + New Snippet, fill in details (usage/module/language optional).
 - **Track Todos**: Open the Todos panel, add tasks, set priorities and deadlines.
@@ -61,10 +63,18 @@ $ npm run dev
   - `src/main/` — Electron main process, IPC, file services
   - `src/renderer/` — UI components, styles, and logic
   - `src/shared/` — Validators and shared constants
-  - `specs/` — Documentation, plans, and contracts
+  - `specs/` — Documentation, plans, and contracts for spec driven development
 - **Hot Reload**: Changes in renderer auto-refresh the UI.
 - **IPC API**: Extend backend features via `window.knowledgeBase.invoke()`.
 - **Styling**: Customize themes in `src/renderer/styles/`.
+
+> For the dev environment, you can copy the `.dev-storage.sample.json` into a `.dev-storage.json` file in the project root. When running `npm run dev` the location in this config will be used and you don't have to select the location on each startup.
+
+### Technologies
+
+* [electron](https://www.electronjs.org/de/) - cross-platform desktop application from nodejs app
+* [vite](https://vite.dev/) - as a build tool
+* [spec-kit](https://github.com/github/spec-kit) - ai assisted spec-driven development scripts
 
 ---
 
@@ -79,6 +89,8 @@ Pull requests, issues, and feature suggestions are welcome! See [specs/master/pl
 MIT License. See [LICENSE](LICENSE.md) for details.
 
 ---
+
+## 📸 Screenshots
 
 ![Screenshot](docs/Notes-Screen.jpg)
 
