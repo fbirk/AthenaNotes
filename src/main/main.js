@@ -8,37 +8,77 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const isDev = Boolean(process.env.VITE_DEV_SERVER_URL);
 
-// Preconfigured dev storage location (from .dev-storage.json if present)
 import fs from 'node:fs';
-let devStoragePath = null;
-if (isDev) {
-  try {
-    // Try workspace root and main.js directory
+
+// ==================== Bootstrap Config ====================
+// Stores the user's storage location path so the app can find it on startup.
+// In dev: .dev-storage.json in workspace root
+// In production: storage-location.json next to the executable
+
+/**
+ * Get the path to the bootstrap config file
+ * @returns {string} Absolute path to bootstrap config
+ */
+function getBootstrapConfigPath() {
+  if (isDev) {
+    // Dev mode: check workspace root and main.js directory
     const candidatePaths = [
       path.resolve(process.cwd(), '.dev-storage.json'),
       path.join(__dirname, '../../.dev-storage.json')
     ];
-    let foundPath = null;
     for (const candidate of candidatePaths) {
-      console.log('Checking for dev storage config at:', candidate);
       if (fs.existsSync(candidate)) {
-        foundPath = candidate;
-        break;
+        return candidate;
       }
     }
-    if (foundPath) {
-      const raw = fs.readFileSync(foundPath, 'utf-8');
+    // Default to workspace root for creation
+    return path.resolve(process.cwd(), '.dev-storage.json');
+  } else {
+    // Production: next to the executable
+    const exeDir = path.dirname(app.getPath('exe'));
+    return path.join(exeDir, 'storage-location.json');
+  }
+}
+
+/**
+ * Read the bootstrap config to get the saved storage location
+ * @returns {string|null} Storage path or null if not set
+ */
+function readBootstrapConfig() {
+  try {
+    const configPath = getBootstrapConfigPath();
+    if (fs.existsSync(configPath)) {
+      const raw = fs.readFileSync(configPath, 'utf-8');
       const parsed = JSON.parse(raw);
-      if (parsed.devStoragePath) {
-        devStoragePath = parsed.devStoragePath;
-        console.log('Loaded devStoragePath from:', foundPath);
-      }
-    } else {
-      console.warn('No .dev-storage.json found in expected locations.');
+      // Support both old devStoragePath and new storagePath keys
+      return parsed.storagePath || parsed.devStoragePath || null;
     }
   } catch (e) {
-    console.warn('Could not read .dev-storage.json:', e);
+    console.warn('Could not read bootstrap config:', e);
   }
+  return null;
+}
+
+/**
+ * Write the storage location to bootstrap config
+ * @param {string} storagePath - Absolute path to user's storage folder
+ */
+function writeBootstrapConfig(storagePath) {
+  try {
+    const configPath = getBootstrapConfigPath();
+    const data = { storagePath, savedAt: new Date().toISOString() };
+    fs.writeFileSync(configPath, JSON.stringify(data, null, 2), 'utf-8');
+    console.log('Saved storage location to bootstrap config:', configPath);
+  } catch (e) {
+    console.error('Could not write bootstrap config:', e);
+    throw new Error('BOOTSTRAP_CONFIG_WRITE_ERROR');
+  }
+}
+
+// Read saved storage path on startup
+let savedStoragePath = readBootstrapConfig();
+if (savedStoragePath) {
+  console.log('Found saved storage location:', savedStoragePath);
 }
 
 function createWindow() {
@@ -75,24 +115,24 @@ function createWindow() {
 app.whenReady().then(async () => {
   if (isDev) {
     console.log('[DEV MODE]');
-    console.log('Resolved devStoragePath:', devStoragePath);
   }
-  let fileService, configService;
-  if (isDev && devStoragePath) {
-    console.log('Initializing fileService/configService with devStoragePath:', devStoragePath);
-    // Dynamically import and initialize with dev path
-    fileService = (await import('./services/file-service.js')).fileService;
-    configService = (await import('./services/config-service.js')).configService;
-    await fileService.initialize(devStoragePath);
+  console.log('Saved storage path:', savedStoragePath);
+
+  // Import services
+  const fileService = (await import('./services/file-service.js')).fileService;
+  const configService = (await import('./services/config-service.js')).configService;
+
+  // If we have a saved storage path, initialize the file service with it
+  if (savedStoragePath) {
+    console.log('Initializing fileService/configService with saved storage path:', savedStoragePath);
     try {
+      await fileService.initialize(savedStoragePath);
+      // Try to read existing config to verify the path is valid
       await fileService.readConfig();
     } catch (e) {
-      await fileService.createInitialConfig(devStoragePath);
+      console.warn('Could not initialize with saved path, may need setup:', e.message);
+      // Path may be invalid or config deleted - let the renderer handle setup
     }
-  } else {
-    // Normal import
-    fileService = (await import('./services/file-service.js')).fileService;
-    configService = (await import('./services/config-service.js')).configService;
   }
 
   // Attach to global for IPC handlers
@@ -239,6 +279,8 @@ function setupIpcHandlers() {
   ipcMain.handle('config.setStorageLocation', async (_event, storagePath) => {
     try {
       const result = await configService.setStorageLocation(storagePath);
+      // Save to bootstrap config so app remembers on next startup
+      writeBootstrapConfig(storagePath);
       return { success: true, data: result };
     } catch (error) {
       return { success: false, error: error.message };
