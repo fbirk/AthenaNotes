@@ -64,7 +64,9 @@ function createWindow() {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
     mainWindow.webContents.openDevTools({ mode: 'detach' });
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+    // Correctly resolve path for packaged app (asar or unpacked)
+    const indexPath = path.join(app.getAppPath(), 'dist', 'renderer', 'index.html');
+    mainWindow.loadFile(indexPath);
   }
 }
 
