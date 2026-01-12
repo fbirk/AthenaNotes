@@ -104,3 +104,8 @@ MIT License. See [LICENSE](LICENSE.md) for details.
 
 ![Screenshot](docs/Notes-Screen.jpg)
 
+## Open ToDos
+
+- [] Editing of todo-items in the detail window instead of modal
+- [] Markdown Preview for todo-items in detail window
+- [] Integrate todos into projects detail view
