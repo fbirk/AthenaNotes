@@ -26,9 +26,23 @@ async function checkInitialization() {
   }
 }
 
+async function displayAppVersion() {
+  const versionEl = document.getElementById('app-version');
+  if (!versionEl) return;
+
+  try {
+    const result = await window.knowledgeBase.invoke('app.getVersion');
+    if (result.success) {
+      versionEl.textContent = `v${result.data}`;
+    }
+  } catch (error) {
+    console.error('Failed to get app version:', error);
+  }
+}
+
 function mountNavigation() {
-  const header = document.querySelector('.app-header');
-  if (!header || header.querySelector('.navigation')) {
+  const navContainer = document.getElementById('app-navigation');
+  if (!navContainer || navContainer.querySelector('.navigation')) {
     return;
   }
 
@@ -45,13 +59,16 @@ function mountNavigation() {
     nav.append(button);
   });
 
-  header.append(nav);
+  navContainer.append(nav);
 }
 
 /**
  * Initialize the application
  */
 export async function bootstrap() {
+  // Display app version
+  displayAppVersion();
+
   // Check if app is initialized
   isInitialized = await checkInitialization();
 
@@ -61,10 +78,10 @@ export async function bootstrap() {
   } else {
     // Mount navigation for initialized app
     mountNavigation();
-    
+
     // Mount todos panel
     mountTodosPanel();
-    
+
     // Setup keyboard shortcuts
     setupKeyboardShortcuts();
   }

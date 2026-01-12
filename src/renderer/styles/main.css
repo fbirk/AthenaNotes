@@ -30,11 +30,33 @@ body {
 .app-header {
   border-bottom: 1px solid var(--color-border);
   padding-bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.app-header-title-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .app-header h1 {
   margin: 0;
   font-size: 1.5rem;
+}
+
+.app-version {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  background: var(--color-surface-alt);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.app-header-nav-row:empty {
+  display: none;
 }
 
 .app-content {

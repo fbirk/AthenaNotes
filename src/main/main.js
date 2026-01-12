@@ -83,6 +83,7 @@ if (savedStoragePath) {
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
+    autoHideMenuBar: true,
     width: 1200,
     height: 800,
     minWidth: 900,
@@ -200,6 +201,12 @@ function setupIpcHandlers() {
   // Use global.fileService/configService for all handlers
   const fileService = global.fileService;
   const configService = global.configService;
+
+  // App version API
+  ipcMain.handle('app.getVersion', () => {
+    return { success: true, data: app.getVersion() };
+  });
+
   // Configuration API
   ipcMain.handle('config.get', async () => {
   // ==================== Snippet API ====================
