@@ -7,6 +7,21 @@
   font-size: 1em;
   overflow-x: auto;
 }
+
+/* Text wrapping for snippet code blocks */
+.snippet-card pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 2.5;
+}
+
+.snippet-card pre code {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 2.5;
+}
 .hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-section, .hljs-link {
   color: #ffb86c;
 }
@@ -816,6 +831,23 @@
 .note-item-meta {
   font-size: 0.75rem;
   color: var(--color-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.note-item-tag {
+  font-size: 0.7rem;
+  color: var(--color-accent);
+  background: rgba(100, 149, 237, 0.15);
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+}
+
+.note-item.active .note-item-tag {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
 }
 
 .notes-list-empty {

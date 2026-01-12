@@ -389,7 +389,7 @@ export class ProjectsComponent {
    * Refresh the component
    */
   async refresh() {
-    const container = document.getElementById('app-content');
+    const container = document.getElementById('view');
     if (container) {
       container.innerHTML = await this.render();
       this.setupEventListeners();

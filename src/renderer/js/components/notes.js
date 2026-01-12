@@ -189,14 +189,18 @@ export class NotesComponent {
       return;
     }
 
-    listContainer.innerHTML = this.notes.map(note => `
+    listContainer.innerHTML = this.notes.map(note => {
+      const project = note.projectId ? this.projects.find(p => p.id === note.projectId) : null;
+      return `
       <div class="note-item ${this.currentNote?.id === note.id ? 'active' : ''}" data-note-id="${note.id}">
         <div class="note-item-title">${this.escapeHtml(note.title)}</div>
         <div class="note-item-meta">
           ${new Date(note.modifiedAt).toLocaleDateString()}
+          ${project ? `<span class="note-item-tag">${this.escapeHtml(project.name)}</span>` : ''}
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
     // Attach click handlers to note items
     listContainer.querySelectorAll('.note-item').forEach(item => {
@@ -283,9 +287,16 @@ export class NotesComponent {
     // Show editor
     this.showEditor();
 
+    // Reset to edit mode (not preview)
+    const previewDiv = document.getElementById('note-preview');
+    const toggleBtn = document.getElementById('toggle-preview-btn');
+    if (previewDiv) previewDiv.style.display = 'none';
+    if (toggleBtn) toggleBtn.textContent = 'Preview';
+
     // Clear inputs
     const titleInput = document.getElementById('note-title');
     const contentTextarea = document.getElementById('note-content');
+    if (contentTextarea) contentTextarea.style.display = 'block';
 
     if (titleInput) titleInput.value = '';
     if (contentTextarea) contentTextarea.value = '';
@@ -325,9 +336,16 @@ export class NotesComponent {
         // Show editor
         this.showEditor();
 
+        // Reset to edit mode (not preview)
+        const previewDiv = document.getElementById('note-preview');
+        const toggleBtn = document.getElementById('toggle-preview-btn');
+        if (previewDiv) previewDiv.style.display = 'none';
+        if (toggleBtn) toggleBtn.textContent = 'Preview';
+
         // Populate inputs
         const titleInput = document.getElementById('note-title');
         const contentTextarea = document.getElementById('note-content');
+        if (contentTextarea) contentTextarea.style.display = 'block';
         const noteProjectSelect = document.getElementById('note-project');
 
         if (titleInput) titleInput.value = this.currentNote.title;

@@ -53,11 +53,6 @@ export async function renderSnippetsComponent(container) {
 }
 
 
-async function loadSnippets() {
-  const res = await invoke('snippets.list');
-  snippets = res.success ? res.data : [];
-}
-
 async function performSearch() {
   // Use IPC search for accuracy and performance
   const tagFilters = {};
@@ -131,14 +126,13 @@ async function showSnippetForm(id) {
       <form id="snippet-form">
         <label>Title <input name="title" value="${snippet.title || ''}" required maxlength="200" /></label>
         <label>Description <input name="description" value="${snippet.description || ''}" maxlength="500" /></label>
-        <label>Language <input name="language" value="${snippet.language || ''}" required /></label>
         <label>Code
           <textarea name="code" id="snippet-code-area" rows="8" required>${snippet.code || ''}</textarea>
         </label>
         <div id="snippet-code-preview" class="code-preview" style="margin-top:8px;"></div>
         <label>Tags (comma, space separated)</label>
         <div class="tag-inputs">
-          <input name="tags-language" placeholder="Languages" value="${(snippet.tags.language||[]).join(', ')}" />
+          <input name="tags-language" placeholder="Languages (required)" value="${(snippet.tags.language||[]).join(', ')}" required />
           <input name="tags-usage" placeholder="Usage" value="${(snippet.tags.usage||[]).join(', ')}" />
           <input name="tags-module" placeholder="Module" value="${(snippet.tags.module||[]).join(', ')}" />
         </div>
@@ -154,8 +148,11 @@ async function showSnippetForm(id) {
   // Live code preview with highlight.js
   const codeArea = document.getElementById('snippet-code-area');
   const codePreview = document.getElementById('snippet-code-preview');
+  const tagsLanguageInput = document.querySelector('input[name="tags-language"]');
   function updatePreview() {
-    const lang = document.querySelector('input[name="language"]').value.trim();
+    // Use the first language tag for syntax highlighting
+    const langTags = (tagsLanguageInput.value || '').split(/[, ]+/).filter(Boolean);
+    const lang = langTags[0] || '';
     const code = codeArea.value;
     codePreview.innerHTML = `<pre><code class="hljs ${lang}">${escapeHtml(code)}</code></pre>`;
     if (window.hljs) {
@@ -163,18 +160,27 @@ async function showSnippetForm(id) {
     }
   }
   codeArea.oninput = updatePreview;
-  document.querySelector('input[name="language"]').oninput = updatePreview;
+  tagsLanguageInput.oninput = updatePreview;
   updatePreview();
   document.getElementById('snippet-form').onsubmit = async (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
+    const languageTags = (fd.get('tags-language')||'').split(/[, ]+/).filter(Boolean);
+
+    // Validate at least one language tag
+    if (languageTags.length === 0) {
+      alert('Please enter at least one language tag.');
+      tagsLanguageInput.focus();
+      return;
+    }
+
     const data = {
       title: fd.get('title'),
       description: fd.get('description'),
-      language: fd.get('language'),
+      language: languageTags[0], // Use first language tag as main language
       code: fd.get('code'),
       tags: {
-        language: (fd.get('tags-language')||'').split(/[, ]+/).filter(Boolean),
+        language: languageTags,
         usage: (fd.get('tags-usage')||'').split(/[, ]+/).filter(Boolean),
         module: (fd.get('tags-module')||'').split(/[, ]+/).filter(Boolean),
       }
@@ -184,7 +190,7 @@ async function showSnippetForm(id) {
     } else {
       await invoke('snippets.create', data);
     }
-    await loadSnippets();
+    await performSearch();
     renderSnippetsList();
     modal.style.display = 'none';
   };
@@ -193,7 +199,7 @@ async function showSnippetForm(id) {
 async function deleteSnippet(id) {
   if (!confirm('Delete this snippet?')) return;
   await invoke('snippets.delete', id);
-  await loadSnippets();
+  await performSearch();
   renderSnippetsList();
 }
 
