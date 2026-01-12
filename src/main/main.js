@@ -82,8 +82,14 @@ if (savedStoragePath) {
 }
 
 function createWindow() {
+  // Resolve icon path - in dev from project root, in production from app resources
+  const iconPath = isDev
+    ? path.resolve(process.cwd(), 'ressources', 'logo.png')
+    : path.join(process.resourcesPath, 'logo.png');
+
   const mainWindow = new BrowserWindow({
     autoHideMenuBar: true,
+    icon: iconPath,
     width: 1200,
     height: 800,
     minWidth: 900,

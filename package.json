@@ -30,6 +30,12 @@
       "dist/**/*",
       "dist-electron/**/*"
     ],
+    "extraResources": [
+      {
+        "from": "ressources/logo.png",
+        "to": "logo.png"
+      }
+    ],
     "win": {
       "target": [
         {
@@ -39,7 +45,7 @@
           ]
         }
       ],
-      "icon": "build/icon.ico"
+      "icon": "ressources/logo.png"
     },
     "nsis": {
       "oneClick": false,
