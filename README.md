@@ -55,6 +55,16 @@ $ npm run dev
 - **Manage Projects**: Create, edit, and delete projects. Group notes and todos by project.
 - **Launch Tools**: Add your favorite apps/URLs in Tools. Launch with one click.
 
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+T` | Toggle the pinned todos panel (not available on Todos page) |
+| `Ctrl+N` | Create a new note (navigates to Notes if on another page) |
+| `Ctrl+S` | Save the current note |
+| `Ctrl+F` | Focus the search input (notes or snippets) |
+| `Escape` | Close any open modal dialog |
+
 ---
 
 ## 👩‍💻 Developer Guide
