@@ -262,15 +262,14 @@ export class TodosSection {
       </div>
 
       <div class="todo-form-fields">
-        <div class="form-group">
-          <label for="todo-description-input">Description</label>
-          <textarea
-            id="todo-description-input"
-            class="todo-description-textarea"
-            placeholder="Description (optional)"
-            rows="4"
-          >${this.escapeHtml(todo.description || '')}</textarea>
-        </div>
+        ${this.currentTodo ? `
+          <div class="form-group checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="todo-completed-checkbox" ${todo.completed ? 'checked' : ''} />
+              Mark as completed
+            </label>
+          </div>
+        ` : ''}
 
         <div class="form-row">
           <div class="form-group">
@@ -302,14 +301,14 @@ export class TodosSection {
           </div>
         </div>
 
-        ${this.currentTodo ? `
-          <div class="form-group checkbox-group">
-            <label class="checkbox-label">
-              <input type="checkbox" id="todo-completed-checkbox" ${todo.completed ? 'checked' : ''} />
-              Mark as completed
-            </label>
-          </div>
-        ` : ''}
+        <div class="form-group todo-description-group">
+          <label for="todo-description-input">Description</label>
+          <textarea
+            id="todo-description-input"
+            class="todo-description-textarea"
+            placeholder="Description (optional)"
+          >${this.escapeHtml(todo.description || '')}</textarea>
+        </div>
       </div>
     `;
 

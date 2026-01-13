@@ -145,7 +145,13 @@ export class TodosPinnedHeader {
       return;
     }
 
-    listContainer.innerHTML = this.todos.map(todo => {
+    // Sort todos: incomplete first, completed at the end
+    const sortedTodos = [...this.todos].sort((a, b) => {
+      if (a.completed === b.completed) return 0;
+      return a.completed ? 1 : -1;
+    });
+
+    listContainer.innerHTML = sortedTodos.map(todo => {
       const project = todo.projectId ? this.projects.find(p => p.id === todo.projectId) : null;
       return `
         <div class="todo-item ${todo.completed ? 'completed' : ''}" data-todo-id="${todo.id}">

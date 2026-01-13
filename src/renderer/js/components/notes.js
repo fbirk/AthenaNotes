@@ -331,26 +331,49 @@ export class NotesComponent {
       if (result.success) {
         this.currentNote = result.data;
         this.hasUnsavedChanges = false;
-        this.isEditing = false;
+        this.isEditing = true; // Start in preview mode
 
-        // Show editor
+        // Show editor container
         this.showEditor();
 
-        // Reset to edit mode (not preview)
-        const previewDiv = document.getElementById('note-preview');
-        const toggleBtn = document.getElementById('toggle-preview-btn');
-        if (previewDiv) previewDiv.style.display = 'none';
-        if (toggleBtn) toggleBtn.textContent = 'Preview';
-
-        // Populate inputs
+        // Populate inputs first
         const titleInput = document.getElementById('note-title');
         const contentTextarea = document.getElementById('note-content');
-        if (contentTextarea) contentTextarea.style.display = 'block';
+        const previewDiv = document.getElementById('note-preview');
+        const toggleBtn = document.getElementById('toggle-preview-btn');
         const noteProjectSelect = document.getElementById('note-project');
 
         if (titleInput) titleInput.value = this.currentNote.title;
         if (contentTextarea) contentTextarea.value = this.currentNote.content;
         if (noteProjectSelect) noteProjectSelect.value = this.currentNote.projectId || '';
+
+        // Show preview by default
+        if (contentTextarea) contentTextarea.style.display = 'none';
+        if (previewDiv) {
+          previewDiv.style.display = 'block';
+          previewDiv.innerHTML = markdownService.render(this.currentNote.content, this.currentNote.id);
+
+          // Validate internal links and style broken ones
+          const { broken } = markdownService.validateInternalLinks(this.currentNote.content, this.notes);
+
+          // Add click handler for internal links and mark broken ones
+          previewDiv.querySelectorAll('a[href^="internal://"]').forEach(link => {
+            const title = decodeURIComponent(link.getAttribute('href').replace('internal://', ''));
+
+            if (broken.includes(title)) {
+              link.classList.add('broken-link');
+              link.title = `Note "${title}" not found`;
+            } else {
+              link.classList.add('internal-link');
+            }
+
+            link.addEventListener('click', (e) => {
+              e.preventDefault();
+              this.navigateToNoteByTitle(title);
+            });
+          });
+        }
+        if (toggleBtn) toggleBtn.textContent = 'Edit';
 
         this.updateSaveButton();
         this.renderNotesList(); // Update active state

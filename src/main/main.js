@@ -666,8 +666,9 @@ function setupIpcHandlers() {
         return { success: false, error: 'PROJECT_NOT_FOUND' };
       }
 
-      // Get associated notes
-      const notes = await fileService.listNotes(project.folder);
+      // Get all notes and filter by projectId
+      const allNotes = await fileService.listNotes();
+      const notes = allNotes.filter(note => note.projectId === id);
 
       return {
         success: true,

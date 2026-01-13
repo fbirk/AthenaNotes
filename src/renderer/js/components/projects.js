@@ -101,11 +101,8 @@ export class ProjectsComponent {
           <div class="section-detail-section">
             <div class="section-detail-section-header">
               <h3>Notes (${notes.length})</h3>
-              <button class="btn-secondary" id="btn-create-note-in-project">+ New Note</button>
             </div>
-            <div class="section-detail-list" id="project-notes-list">
-              ${this.renderProjectNotes(notes)}
-            </div>
+            ${this.renderProjectNotes(notes)}
           </div>
         </div>
       </div>
@@ -120,16 +117,20 @@ export class ProjectsComponent {
       return '<div class="section-list-empty">No notes in this project yet.</div>';
     }
 
-    return notes
-      .map(
-        note => `
-      <div class="section-detail-list-item" data-note-id="${note.id}">
-        <div class="section-item-title">${this.escapeHtml(note.title)}</div>
-        <div class="section-item-meta">Modified ${this.formatDate(note.modifiedAt)}</div>
+    return `
+      <div class="project-notes-list">
+        ${notes.map(note => `
+          <div class="project-note-item" data-note-id="${note.id}">
+            <span class="project-note-title">${this.escapeHtml(note.title)}</span>
+            ${note.tags && note.tags.length > 0 ? `
+              <div class="project-note-tags">
+                ${note.tags.map(tag => `<span class="project-note-tag">${this.escapeHtml(tag)}</span>`).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `).join('')}
       </div>
-    `
-      )
-      .join('');
+    `;
   }
 
   /**
@@ -167,19 +168,8 @@ export class ProjectsComponent {
       });
     }
 
-    // Create note in project button
-    const btnCreateNote = document.getElementById('btn-create-note-in-project');
-    if (btnCreateNote) {
-      btnCreateNote.addEventListener('click', () => {
-        if (this.selectedProject) {
-          // Navigate to notes view with project filter
-          window.location.hash = `#/notes?project=${this.selectedProject.id}`;
-        }
-      });
-    }
-
     // Note items (navigate to note)
-    const noteItems = document.querySelectorAll('.section-detail-list-item');
+    const noteItems = document.querySelectorAll('.project-note-item');
     noteItems.forEach(item => {
       item.addEventListener('click', () => {
         const noteId = item.dataset.noteId;
