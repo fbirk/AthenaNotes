@@ -32,8 +32,12 @@
     ],
     "extraResources": [
       {
-        "from": "ressources/logo.png",
-        "to": "logo.png"
+        "from": "ressources/favicon.ico",
+        "to": "icon.ico"
+      },
+      {
+        "from": "ressources/favicon-256x256.png",
+        "to": "icon.png"
       }
     ],
     "win": {
@@ -45,7 +49,7 @@
           ]
         }
       ],
-      "icon": "ressources/logo.png"
+      "icon": "ressources/favicon.ico"
     },
     "nsis": {
       "oneClick": false,

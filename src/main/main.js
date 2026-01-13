@@ -83,9 +83,10 @@ if (savedStoragePath) {
 
 function createWindow() {
   // Resolve icon path - in dev from project root, in production from app resources
+  // Use .ico on Windows for best quality, .png as fallback
   const iconPath = isDev
-    ? path.resolve(process.cwd(), 'ressources', 'logo.png')
-    : path.join(process.resourcesPath, 'logo.png');
+    ? path.resolve(process.cwd(), 'ressources', process.platform === 'win32' ? 'favicon.ico' : 'favicon-256x256.png')
+    : path.join(process.resourcesPath, process.platform === 'win32' ? 'icon.ico' : 'icon.png');
 
   const mainWindow = new BrowserWindow({
     autoHideMenuBar: true,
