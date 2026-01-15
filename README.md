@@ -107,5 +107,5 @@ MIT License. See [LICENSE](LICENSE.md) for details.
 ## Open ToDos
 
 - [x] Editing of todo-items in the detail window instead of modal
-- [] Markdown Preview for todo-items in detail window
+- [x] Markdown Preview for todo-items in detail window
 - [x] Integrate todos into projects detail view

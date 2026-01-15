@@ -1,3 +1,5 @@
+import { markdownService } from '../services/markdown.js';
+
 /**
  * Todos Section Component
  * Main todos view with sidebar list and detail panel.
@@ -14,6 +16,7 @@ export class TodosSection {
     this.hasUnsavedChanges = false;
     this.autoSaveTimer = null;
     this.isCreatingNew = false;
+    this.isEditing = false; // false = preview mode (default), true = edit mode
     this.filter = 'all';
     this.boundOnTodosChanged = this.onTodosChanged.bind(this);
   }
@@ -212,6 +215,7 @@ export class TodosSection {
     this.currentTodo = this.selectedTodo;
     this.isCreatingNew = false;
     this.hasUnsavedChanges = false;
+    this.isEditing = false; // Default to preview mode when viewing existing todo
 
     // Clear auto-save timer
     if (this.autoSaveTimer) {
@@ -244,6 +248,8 @@ export class TodosSection {
     detailContainer.style.display = 'flex';
 
     const todo = this.currentTodo || {};
+    const descriptionContent = todo.description || '';
+    const showPreview = !this.isEditing && descriptionContent;
 
     detailContainer.innerHTML = `
       <div class="editor-toolbar">
@@ -302,12 +308,26 @@ export class TodosSection {
         </div>
 
         <div class="form-group todo-description-group">
-          <label for="todo-description-input">Description</label>
-          <textarea
-            id="todo-description-input"
-            class="todo-description-textarea"
-            placeholder="Description (optional)"
-          >${this.escapeHtml(todo.description || '')}</textarea>
+          <div class="todo-description-header">
+            <label for="todo-description-input">Description</label>
+            <button type="button" class="btn-secondary btn-small" id="toggle-preview-btn">
+              ${this.isEditing ? 'Preview' : 'Edit'}
+            </button>
+          </div>
+          <div class="todo-description-content">
+            <textarea
+              id="todo-description-input"
+              class="todo-description-textarea"
+              placeholder="Description (supports Markdown)"
+              style="display: ${this.isEditing ? 'block' : 'none'};"
+            >${this.escapeHtml(descriptionContent)}</textarea>
+            <div
+              id="todo-description-preview"
+              class="todo-description-preview"
+              style="display: ${showPreview ? 'block' : 'none'};"
+            >${showPreview ? markdownService.render(descriptionContent) : ''}</div>
+            ${!this.isEditing && !descriptionContent ? '<div class="todo-description-empty">No description. Click Edit to add one.</div>' : ''}
+          </div>
         </div>
       </div>
     `;
@@ -329,6 +349,7 @@ export class TodosSection {
     this.selectedTodo = null;
     this.isCreatingNew = true;
     this.hasUnsavedChanges = false;
+    this.isEditing = true; // Start in edit mode when creating new todo
 
     // Clear auto-save timer
     if (this.autoSaveTimer) {
@@ -358,6 +379,7 @@ export class TodosSection {
     const completedCheckbox = document.getElementById('todo-completed-checkbox');
     const saveBtn = document.getElementById('save-todo-btn');
     const deleteBtn = document.getElementById('delete-todo-btn');
+    const togglePreviewBtn = document.getElementById('toggle-preview-btn');
 
     // Input change handlers - trigger onContentChange for auto-save
     const inputElements = [titleInput, descInput, prioritySelect, projectSelect, deadlineInput];
@@ -383,8 +405,59 @@ export class TodosSection {
       deleteBtn.addEventListener('click', () => this.deleteTodo(this.currentTodo.id));
     }
 
+    // Toggle preview button
+    if (togglePreviewBtn) {
+      togglePreviewBtn.addEventListener('click', () => this.togglePreview());
+    }
+
     // Initial update of save button state
     this.updateSaveButton();
+  }
+
+  /**
+   * Toggle between edit and preview mode for description
+   */
+  togglePreview() {
+    this.isEditing = !this.isEditing;
+
+    const descTextarea = document.getElementById('todo-description-input');
+    const previewDiv = document.getElementById('todo-description-preview');
+    const toggleBtn = document.getElementById('toggle-preview-btn');
+    const emptyDiv = document.querySelector('.todo-description-empty');
+
+    if (!descTextarea || !toggleBtn) return;
+
+    if (this.isEditing) {
+      // Switch to edit mode
+      descTextarea.style.display = 'block';
+      if (previewDiv) previewDiv.style.display = 'none';
+      if (emptyDiv) emptyDiv.style.display = 'none';
+      toggleBtn.textContent = 'Preview';
+      descTextarea.focus();
+    } else {
+      // Switch to preview mode
+      const content = descTextarea.value;
+      descTextarea.style.display = 'none';
+
+      if (content) {
+        if (previewDiv) {
+          previewDiv.innerHTML = markdownService.render(content);
+          previewDiv.style.display = 'block';
+        }
+        if (emptyDiv) emptyDiv.style.display = 'none';
+      } else {
+        if (previewDiv) previewDiv.style.display = 'none';
+        // Show empty message if no content
+        const descContent = document.querySelector('.todo-description-content');
+        if (descContent && !descContent.querySelector('.todo-description-empty')) {
+          const newEmptyDiv = document.createElement('div');
+          newEmptyDiv.className = 'todo-description-empty';
+          newEmptyDiv.textContent = 'No description. Click Edit to add one.';
+          descContent.appendChild(newEmptyDiv);
+        }
+      }
+      toggleBtn.textContent = 'Edit';
+    }
   }
 
   /**
