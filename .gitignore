@@ -34,3 +34,4 @@ tests/e2e/playwright-report/
 .vscode/
 .idea/
 .claude/settings.local.json
+tmpclaude-*

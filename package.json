@@ -30,6 +30,16 @@
       "dist/**/*",
       "dist-electron/**/*"
     ],
+    "extraResources": [
+      {
+        "from": "ressources/favicon.ico",
+        "to": "icon.ico"
+      },
+      {
+        "from": "ressources/favicon-256x256.png",
+        "to": "icon.png"
+      }
+    ],
     "win": {
       "target": [
         {
@@ -39,7 +49,7 @@
           ]
         }
       ],
-      "icon": "build/icon.ico"
+      "icon": "ressources/favicon.ico"
     },
     "nsis": {
       "oneClick": false,

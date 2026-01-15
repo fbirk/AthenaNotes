@@ -82,8 +82,15 @@ if (savedStoragePath) {
 }
 
 function createWindow() {
+  // Resolve icon path - in dev from project root, in production from app resources
+  // Use .ico on Windows for best quality, .png as fallback
+  const iconPath = isDev
+    ? path.resolve(process.cwd(), 'ressources', process.platform === 'win32' ? 'favicon.ico' : 'favicon-256x256.png')
+    : path.join(process.resourcesPath, process.platform === 'win32' ? 'icon.ico' : 'icon.png');
+
   const mainWindow = new BrowserWindow({
     autoHideMenuBar: true,
+    icon: iconPath,
     width: 1200,
     height: 800,
     minWidth: 900,
@@ -659,8 +666,9 @@ function setupIpcHandlers() {
         return { success: false, error: 'PROJECT_NOT_FOUND' };
       }
 
-      // Get associated notes
-      const notes = await fileService.listNotes(project.folder);
+      // Get all notes and filter by projectId
+      const allNotes = await fileService.listNotes();
+      const notes = allNotes.filter(note => note.projectId === id);
 
       return {
         success: true,

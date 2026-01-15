@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Developer Knowledge Base</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png" />
     <link rel="stylesheet" href="./styles/themes.css" />
     <link rel="stylesheet" href="./styles/main.css" />
     <link rel="stylesheet" href="./styles/components.css" />
@@ -12,8 +16,22 @@
     <div id="app" class="app-shell">
       <header class="app-header">
         <div class="app-header-title-row">
+          <img src="/logo.png" alt="Logo" class="app-logo" />
           <h1>Developer Knowledge Base</h1>
           <span id="app-version" class="app-version"></span>
+          <div class="help-button-container">
+            <button type="button" id="help-btn" class="help-btn" title="Keyboard shortcuts">?</button>
+            <div id="help-popup" class="help-popup">
+              <h4>Keyboard Shortcuts</h4>
+              <ul class="shortcuts-list">
+                <li><kbd>Ctrl</kbd> + <kbd>T</kbd> <span>Toggle todos panel</span></li>
+                <li><kbd>Ctrl</kbd> + <kbd>N</kbd> <span>Create new note</span></li>
+                <li><kbd>Ctrl</kbd> + <kbd>S</kbd> <span>Save current note/todo</span></li>
+                <li><kbd>Ctrl</kbd> + <kbd>F</kbd> <span>Focus search field</span></li>
+                <li><kbd>Esc</kbd> <span>Close modals/dialogs</span></li>
+              </ul>
+            </div>
+          </div>
         </div>
         <div id="app-navigation" class="app-header-nav-row"></div>
       </header>

@@ -40,6 +40,32 @@ async function displayAppVersion() {
   }
 }
 
+/**
+ * Setup help popup functionality
+ */
+function setupHelpPopup() {
+  const helpBtn = document.getElementById('help-btn');
+  const helpPopup = document.getElementById('help-popup');
+  const container = document.querySelector('.help-button-container');
+
+  if (!helpBtn || !helpPopup || !container) return;
+
+  // Show popup on hover over button
+  helpBtn.addEventListener('mouseenter', () => {
+    helpPopup.classList.add('visible');
+  });
+
+  // Hide popup when mouse leaves the container (button + popup area)
+  container.addEventListener('mouseleave', () => {
+    helpPopup.classList.remove('visible');
+  });
+
+  // Hide popup on focus lost (when tabbing away)
+  helpBtn.addEventListener('blur', () => {
+    helpPopup.classList.remove('visible');
+  });
+}
+
 function mountNavigation() {
   const navContainer = document.getElementById('app-navigation');
   if (!navContainer || navContainer.querySelector('.navigation')) {
@@ -68,6 +94,9 @@ function mountNavigation() {
 export async function bootstrap() {
   // Display app version
   displayAppVersion();
+
+  // Setup help popup (always available)
+  setupHelpPopup();
 
   // Check if app is initialized
   isInitialized = await checkInitialization();
