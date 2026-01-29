@@ -5,6 +5,7 @@ import { renderSnippetsComponent } from './components/snippets.js';
 import { renderRoadmapsComponent } from './components/roadmaps.js';
 import { renderToolsComponent } from './components/tools.js';
 import { TodosSection } from './components/todos-section.js';
+import { DailyTodos } from './components/daily-todos.js';
 
 // Store active component instance
 let activeComponent = null;
@@ -42,6 +43,11 @@ const routes = new Map([
   ['#/tools', async (container) => {
     await renderToolsComponent(container);
     return null;
+  }],
+  ['#/daily-todos', (container) => {
+    const dailyTodos = new DailyTodos();
+    dailyTodos.render(container);
+    return dailyTodos;
   }],
 ]);
 

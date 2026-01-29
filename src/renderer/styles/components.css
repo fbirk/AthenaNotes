@@ -2117,3 +2117,175 @@
   text-decoration: line-through;
   opacity: 0.7;
 }
+
+/* ==================== Daily Todos Section ==================== */
+
+.daily-todos-section {
+  padding: 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.daily-todos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.daily-todos-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.daily-todos-date {
+  font-size: 0.875rem;
+  color: var(--color-muted);
+}
+
+.daily-todos-input-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.daily-todo-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition: border-color 0.2s;
+}
+
+.daily-todo-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.daily-todo-input::placeholder {
+  color: var(--color-muted);
+}
+
+.daily-todos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.daily-todos-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--color-muted);
+  border: 2px dashed var(--color-border);
+  border-radius: 8px;
+}
+
+.daily-todos-empty p {
+  margin: 0;
+}
+
+.daily-todo-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.daily-todo-item:hover {
+  border-color: var(--color-accent);
+}
+
+.daily-todo-item.completed {
+  opacity: 0.6;
+  background: var(--color-surface-alt);
+}
+
+.daily-todo-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.daily-todo-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.daily-todo-title {
+  display: block;
+  font-size: 1rem;
+  font-weight: 500;
+  word-wrap: break-word;
+  margin-bottom: 0.25rem;
+}
+
+.daily-todo-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.daily-todo-priority {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+}
+
+.daily-todo-priority.priority-low {
+  background: rgba(108, 117, 125, 0.2);
+  color: #6c757d;
+}
+
+.daily-todo-priority.priority-medium {
+  background: rgba(255, 193, 7, 0.2);
+  color: #d4a500;
+}
+
+.daily-todo-priority.priority-high {
+  background: rgba(220, 53, 69, 0.2);
+  color: #dc3545;
+}
+
+.daily-todo-priority.priority-critical {
+  background: rgba(139, 0, 0, 0.3);
+  color: #8b0000;
+  font-weight: 700;
+}
+
+.daily-todo-overdue {
+  font-size: 0.75rem;
+  color: #dc3545;
+  font-weight: 500;
+}
+
+.daily-todo-delete {
+  opacity: 0;
+  transition: opacity 0.2s;
+  background: transparent;
+  border: none;
+  color: var(--color-muted);
+  cursor: pointer;
+  font-size: 1.25rem;
+  padding: 0.25rem;
+  line-height: 1;
+}
+
+.daily-todo-item:hover .daily-todo-delete {
+  opacity: 1;
+}
+
+.daily-todo-delete:hover {
+  color: #dc3545;
+}

@@ -165,7 +165,7 @@ app.on('window-all-closed', () => {
 
 // ==================== IPC Handlers ====================
 
-function setupIpcHandlers() {
+async function setupIpcHandlers() {
   // Remove previous handlers to avoid duplicate registration in dev/hot reload
   ipcMain.removeHandler('config.get');
   ipcMain.removeHandler('snippets.list');
@@ -204,6 +204,13 @@ function setupIpcHandlers() {
   ipcMain.removeHandler('tools.update');
   ipcMain.removeHandler('tools.delete');
   ipcMain.removeHandler('tools.launch');
+  ipcMain.removeHandler('dailyTodos.list');
+  ipcMain.removeHandler('dailyTodos.create');
+  ipcMain.removeHandler('dailyTodos.toggleComplete');
+  ipcMain.removeHandler('dailyTodos.delete');
+  ipcMain.removeHandler('dailyTodos.rollover');
+  ipcMain.removeHandler('dailyTodos.getArchive');
+  ipcMain.removeHandler('dailyTodos.updatePriority');
 
   // Use global.fileService/configService for all handlers
   const fileService = global.fileService;
@@ -1032,6 +1039,104 @@ function setupIpcHandlers() {
       }
 
       return { success: true, data: { launched: true } };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  // ==================== Daily Todos API ====================
+  // Import and initialize dailyTodosService
+  const { dailyTodosService } = await import('./services/daily-todos-service.js');
+  if (fileService.storageRoot) {
+    dailyTodosService.initialize(fileService.storageRoot);
+  }
+
+  ipcMain.handle('dailyTodos.list', async () => {
+    try {
+      if (!fileService.storageRoot) {
+        return { success: false, error: 'STORAGE_NOT_CONFIGURED' };
+      }
+      dailyTodosService.initialize(fileService.storageRoot);
+      const result = await dailyTodosService.list();
+      return { success: true, data: result };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('dailyTodos.create', async (_event, todoData) => {
+    try {
+      if (!fileService.storageRoot) {
+        return { success: false, error: 'STORAGE_NOT_CONFIGURED' };
+      }
+      dailyTodosService.initialize(fileService.storageRoot);
+      const result = await dailyTodosService.create(todoData);
+      return { success: true, data: result };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('dailyTodos.toggleComplete', async (_event, id) => {
+    try {
+      if (!fileService.storageRoot) {
+        return { success: false, error: 'STORAGE_NOT_CONFIGURED' };
+      }
+      dailyTodosService.initialize(fileService.storageRoot);
+      const result = await dailyTodosService.toggleComplete(id);
+      return { success: true, data: result };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('dailyTodos.delete', async (_event, id) => {
+    try {
+      if (!fileService.storageRoot) {
+        return { success: false, error: 'STORAGE_NOT_CONFIGURED' };
+      }
+      dailyTodosService.initialize(fileService.storageRoot);
+      const result = await dailyTodosService.delete(id);
+      return { success: true, data: result };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('dailyTodos.rollover', async () => {
+    try {
+      if (!fileService.storageRoot) {
+        return { success: false, error: 'STORAGE_NOT_CONFIGURED' };
+      }
+      dailyTodosService.initialize(fileService.storageRoot);
+      const result = await dailyTodosService.rollover();
+      return { success: true, data: result };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('dailyTodos.getArchive', async (_event, options) => {
+    try {
+      if (!fileService.storageRoot) {
+        return { success: false, error: 'STORAGE_NOT_CONFIGURED' };
+      }
+      dailyTodosService.initialize(fileService.storageRoot);
+      const result = await dailyTodosService.getArchive(options);
+      return { success: true, data: result };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('dailyTodos.updatePriority', async (_event, id, priority) => {
+    try {
+      if (!fileService.storageRoot) {
+        return { success: false, error: 'STORAGE_NOT_CONFIGURED' };
+      }
+      dailyTodosService.initialize(fileService.storageRoot);
+      const result = await dailyTodosService.updatePriority(id, priority);
+      return { success: true, data: result };
     } catch (error) {
       return { success: false, error: error.message };
     }
