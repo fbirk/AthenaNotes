@@ -12,6 +12,7 @@ A modern, cross-platform developer knowledge base and productivity suite. Organi
 - **Notes**: Markdown editor with live preview, project organization, and internal linking.
 - **Code Snippets**: Save, search, and tag code snippets by language, usage, and module. Syntax highlighting included.
 - **Todos**: Persistent, prioritized todo panel with deadlines and project association.
+- **Daily Todos**: Overview of tasks for the current day. Short and simple.
 - **Projects**: Group notes, todos, and roadmaps by initiative. Edit, rename, and manage projects easily.
 - **Tools Launcher**: Quick-launch for your favorite apps and URLs, categorized for easy access.
 - **Roadmaps & Milestones**: Plan and track progress with visual timelines.
@@ -166,10 +167,3 @@ MIT License. See [LICENSE](LICENSE.md) for details.
 ## 📸 Screenshots
 
 ![Screenshot](docs/Notes-Screen.jpg)
-
-## Open ToDos
-
-- [x] Editing of todo-items in the detail window instead of modal
-- [x] Markdown Preview for todo-items in detail window
-- [x] Integrate todos into projects detail view
-- [] TODOs of the Day

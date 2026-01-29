@@ -19,6 +19,7 @@ npm run test:e2e     # Run E2E tests (Playwright)
 
 # Build & Lint
 npm run build        # Build for production
+npm run build:win    # Build for Windows
 npm run lint         # Run ESLint on src/
 ```
 
@@ -32,13 +33,14 @@ Main Process (Node.js)              Renderer Process (Browser)
 ├── preload.js ─────────────────────┼── js/app.js
 └── services/                       ├── js/router.js
     ├── file-service.js             ├── js/state.js
-    └── config-service.js           ├── js/services/
-                                    │   ├── api.js
+    ├── config-service.js           ├── js/services/
+    └── daily-todos-service.js      │   ├── api.js
                                     │   └── markdown.js
                                     ├── js/components/
                                     │   ├── notes.js
                                     │   ├── todos-pinned-header.js  # Header panel (hidden on #/todos)
                                     │   ├── todos-section.js        # Main todos view
+                                    │   ├── daily-todos.js          # Daily todos view
                                     │   ├── projects.js
                                     │   ├── snippets.js
                                     │   ├── roadmaps.js
@@ -56,7 +58,7 @@ Shared (src/shared/)
 
 **Main Process** (`src/main/`): Handles Electron window management, file system operations, and IPC handlers. All file I/O goes through `file-service.js`.
 
-**Preload Script** (`src/main/preload.js`): Exposes `window.knowledgeBase.invoke(channel, payload)` for secure IPC communication.
+**Preload Script** (`src/main/preload.js`): Exposes `window.knowledgeBase.invoke(channel, payload)` for secure IPC communication and `window.knowledgeBase.on(channel, listener)` for event subscriptions.
 
 **Renderer Process** (`src/renderer/`): UI layer using vanilla JS. Entry point is `js/app.js` which initializes the router and mounts components.
 
@@ -68,11 +70,13 @@ All renderer-to-main communication uses `window.knowledgeBase.invoke(channel, pa
 - `config.*` - Configuration (get, update, setStorageLocation)
 - `notes.*` - Notes CRUD (list, get, create, update, delete, search)
 - `todos.*` - Todos CRUD (list, create, update, delete, toggleComplete)
+- `dailyTodos.*` - Daily Todos (list, create, toggleComplete, delete, rollover, getArchive, updatePriority)
 - `projects.*` - Projects CRUD (list, get, create, update, delete)
 - `snippets.*` - Snippets CRUD (list, get, create, update, delete, search)
 - `milestones.*` - Milestones CRUD (list, create, update, delete, toggleComplete)
 - `tools.*` - Tools CRUD (list, create, update, delete, launch)
 - `fs.*` - File system dialogs (selectFolder, validatePath)
+- `app.getVersion` - Returns the application version
 
 All IPC handlers return `{ success: boolean, data?: any, error?: string }`.
 
@@ -81,6 +85,7 @@ All IPC handlers return `{ success: boolean, data?: any, error?: string }`.
 Hash-based routing in `router.js`. Routes:
 - `#/notes` - Notes view (default)
 - `#/todos` - Todo list management
+- `#/daily-todos` - Daily todos overview
 - `#/projects` - Project management
 - `#/snippets` - Code snippets library
 - `#/roadmaps` - Project roadmaps/milestones
@@ -93,16 +98,18 @@ User selects a storage folder on first run. Structure:
 ```
 <storage-folder>/
 ├── .knowledgebase/
-│   ├── config.json       # App configuration & preferences
-│   ├── todos.json        # Todo items with priority/deadline
-│   ├── projects.json     # Project metadata
-│   ├── milestones.json   # Project milestones/roadmap items
-│   └── tools.json        # Developer tools/links
-├── notes/                # Markdown files with YAML frontmatter
-│   ├── *.md              # Root-level notes
-│   └── <project-folder>/ # Project-specific notes
+│   ├── config.json              # App configuration & preferences
+│   ├── todos.json               # Todo items with priority/deadline
+│   ├── daily-todos.json         # Daily todos with rollover tracking
+│   ├── daily-todos-archive.json # Archived completed daily todos
+│   ├── projects.json            # Project metadata
+│   ├── milestones.json          # Project milestones/roadmap items
+│   └── tools.json               # Developer tools/links
+├── notes/                       # Markdown files with YAML frontmatter
+│   ├── *.md                     # Root-level notes
+│   └── <project-folder>/        # Project-specific notes
 │       └── *.md
-└── snippets/             # Code snippets (one JSON file per snippet)
+└── snippets/                    # Code snippets (one JSON file per snippet)
     └── <uuid>.json
 ```
 
@@ -136,9 +143,43 @@ tags: ["tag1", "tag2"]     # optional
 }
 ```
 
+**Daily Todos** are stored in `daily-todos.json`:
+```json
+{
+  "dailyTodos": [
+    {
+      "id": "uuid",
+      "text": "Task description",
+      "completed": false,
+      "priority": "medium",
+      "createdAt": "ISO timestamp"
+    }
+  ],
+  "lastRolloverDate": "YYYY-MM-DD"
+}
+```
+
+Completed daily todos are archived to `daily-todos-archive.json`:
+```json
+{
+  "archivedTodos": [
+    {
+      "id": "uuid",
+      "text": "Task description",
+      "completed": true,
+      "priority": "high",
+      "createdAt": "ISO timestamp",
+      "completedAt": "ISO timestamp"
+    }
+  ]
+}
+```
+
 ### Key Patterns
 
-- **Component Structure**: Each UI component in `js/components/` exports a class with `render()`, `destroy()`, and `setupEventListeners()` methods
+- **Component Structure**: UI components in `js/components/` follow two patterns:
+  - **Class-based** (notes, todos-section, todos-pinned-header, daily-todos, projects): Export classes with `render()`, `destroy()`, and `setupEventListeners()` methods
+  - **Function-based** (snippets, roadmaps, tools, setup): Export async render functions that create HTML and setup listeners inline
 - **State Management**: Simple object-based state in `js/state.js`, passed through the router
 - **File Service**: Singleton `fileService` handles all file operations; must call `initialize(storagePath)` before use
 - **ID Generation**: UUIDs via the `uuid` package

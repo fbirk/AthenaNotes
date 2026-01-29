@@ -75,7 +75,7 @@ function mountNavigation() {
   const nav = document.createElement('div');
   nav.className = 'navigation';
 
-  ['#/notes', '#/todos', '#/projects', '#/roadmaps', '#/snippets', '#/tools'].forEach((route) => {
+  ['#/notes', '#/daily-todos', '#/todos', '#/projects', '#/roadmaps', '#/snippets', '#/tools'].forEach((route) => {
     const button = document.createElement('button');
     button.type = 'button';
     button.textContent = route.replace('#/', '').replace(/\b\w/g, l => l.toUpperCase());
