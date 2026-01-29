@@ -66,12 +66,17 @@
     "vite-plugin-electron": "^0.29.0"
   },
   "devDependencies": {
-    "electron": "^39.2.7",
     "@playwright/test": "^1.57.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/exec": "^7.1.0",
+    "@semantic-release/git": "^10.0.1",
     "@vitest/ui": "^4.0.16",
+    "conventional-changelog-conventionalcommits": "^9.1.0",
+    "electron": "^39.2.7",
     "electron-builder": "^26.4.0",
     "eslint": "^9.39.2",
     "happy-dom": "^20.1.0",
+    "semantic-release": "^25.0.2",
     "vite-plugin-electron-renderer": "^0.14.6",
     "vitest": "^4.0.16"
   }

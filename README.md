@@ -88,9 +88,72 @@ $ npm run dev
 
 ---
 
+## 🔄 Versioning & Releases
+
+This project uses [Semantic Versioning](https://semver.org/) and [Conventional Commits](https://www.conventionalcommits.org/) for automated releases.
+
+### Version Format: `MAJOR.MINOR.PATCH`
+
+| Change Type | Version Bump | Example |
+|-------------|--------------|---------|
+| Breaking changes | MAJOR | 1.0.0 → 2.0.0 |
+| New features | MINOR | 1.0.0 → 1.1.0 |
+| Bug fixes | PATCH | 1.0.0 → 1.0.1 |
+
+### Commit Message Format
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+### Commit Types
+
+| Type | Description | Triggers Release? |
+|------|-------------|-------------------|
+| `feat:` | New feature | Yes (MINOR) |
+| `fix:` | Bug fix | Yes (PATCH) |
+| `perf:` | Performance improvement | Yes (PATCH) |
+| `docs:` | Documentation only | No |
+| `style:` | Code style (formatting, etc.) | No |
+| `refactor:` | Code refactoring | No |
+| `test:` | Adding/updating tests | No |
+| `chore:` | Maintenance tasks | No |
+| `ci:` | CI/CD changes | No |
+
+### Breaking Changes
+
+For breaking changes, either:
+- Add `!` after the type: `feat!: redesign settings API`
+- Add `BREAKING CHANGE:` in the footer
+
+### Examples
+
+```bash
+# Patch release (1.0.0 → 1.0.1)
+git commit -m "fix: resolve crash when opening empty project"
+
+# Minor release (1.0.0 → 1.1.0)
+git commit -m "feat: add dark mode toggle to settings"
+
+# Major release (1.0.0 → 2.0.0)
+git commit -m "feat!: change note storage format to JSON"
+
+# No release triggered
+git commit -m "docs: update README with new screenshots"
+git commit -m "chore: update dependencies"
+```
+
+---
+
 ## 🤝 Contributing
 
 Pull requests, issues, and feature suggestions are welcome! See [specs/master/plan.md](specs/master/plan.md) for roadmap and guidelines.
+
+When contributing, please follow the [Conventional Commits](#commit-message-format) format for your commit messages to ensure proper versioning and changelog generation.
 
 ---
 
@@ -109,3 +172,4 @@ MIT License. See [LICENSE](LICENSE.md) for details.
 - [x] Editing of todo-items in the detail window instead of modal
 - [x] Markdown Preview for todo-items in detail window
 - [x] Integrate todos into projects detail view
+- [] TODOs of the Day
