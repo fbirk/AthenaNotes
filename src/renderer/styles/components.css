@@ -2289,3 +2289,28 @@
 .daily-todo-delete:hover {
   color: #dc3545;
 }
+
+/* ==================== Save Button Spinner ==================== */
+
+.save-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-text-muted);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+#save-note-btn.saving {
+  pointer-events: none;
+  opacity: 0.8;
+}

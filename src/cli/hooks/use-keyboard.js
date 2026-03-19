@@ -1,0 +1,86 @@
+/**
+ * useKeyboard Hook
+ * Manages a layered keyboard shortcut system:
+ * - Global layer: always active (tab switching, help, quit)
+ * - Contextual layer: registered/unregistered by active tab components
+ */
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { useInput } from 'ink';
+
+/**
+ * @param {Object} options
+ * @param {Function} options.onTabSwitch - Called with tab index (0-6) when 1-7 pressed
+ * @param {Function} options.onHelp - Called when ? pressed
+ * @param {Function} options.onQuit - Called when Ctrl+Q pressed
+ * @param {boolean} options.enabled - Whether keyboard input is enabled (default: true)
+ */
+export function useKeyboard({ onTabSwitch, onHelp, onQuit, enabled = true }) {
+  const contextHandlersRef = useRef(new Map());
+  const [inputMode, setInputMode] = useState(null); // null = normal, 'text' = text input active
+
+  const registerContext = useCallback((id, handler) => {
+    contextHandlersRef.current.set(id, handler);
+  }, []);
+
+  const unregisterContext = useCallback((id) => {
+    contextHandlersRef.current.delete(id);
+  }, []);
+
+  useInput((input, key) => {
+    if (!enabled) return;
+
+    // When in text input mode, don't intercept normal characters
+    if (inputMode === 'text') {
+      if (key.escape) {
+        setInputMode(null);
+      }
+      return;
+    }
+
+    // Global: Ctrl+Q to quit
+    if (input === 'q' && key.ctrl) {
+      onQuit?.();
+      return;
+    }
+
+    // Global: ? for help
+    if (input === '?') {
+      onHelp?.();
+      return;
+    }
+
+    // Global: number keys 1-7 for tab switching
+    const num = parseInt(input, 10);
+    if (num >= 1 && num <= 7 && !key.ctrl && !key.meta) {
+      onTabSwitch?.(num - 1);
+      return;
+    }
+
+    // Pass to contextual handlers (last registered has priority)
+    const handlers = Array.from(contextHandlersRef.current.values());
+    for (let i = handlers.length - 1; i >= 0; i--) {
+      const handled = handlers[i](input, key);
+      if (handled) return;
+    }
+  }, { isActive: enabled });
+
+  return {
+    registerContext,
+    unregisterContext,
+    setInputMode,
+    inputMode,
+  };
+}
+
+/**
+ * Get the list of global keyboard shortcuts for display
+ */
+export function getGlobalShortcuts() {
+  return [
+    { key: '1-7', description: 'Switch tab', section: 'Global' },
+    { key: 'Tab', description: 'Next tab', section: 'Global' },
+    { key: 'Shift+Tab', description: 'Previous tab', section: 'Global' },
+    { key: '?', description: 'Toggle help', section: 'Global' },
+    { key: 'Ctrl+Q', description: 'Quit', section: 'Global' },
+  ];
+}

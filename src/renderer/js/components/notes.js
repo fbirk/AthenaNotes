@@ -14,7 +14,6 @@ export class NotesComponent {
     this.currentNote = null;
     this.selectedProjectId = null;
     this.isEditing = false;
-    this.autoSaveTimer = null;
     this.hasUnsavedChanges = false;
     this.sortBy = 'modifiedAt';
     this.sortOrder = 'desc';
@@ -420,24 +419,12 @@ export class NotesComponent {
   onContentChange() {
     this.hasUnsavedChanges = true;
     this.updateSaveButton();
-
-    // Auto-save with 500ms debounce
-    if (this.autoSaveTimer) {
-      clearTimeout(this.autoSaveTimer);
-    }
-
-    this.autoSaveTimer = setTimeout(() => {
-      if (this.hasUnsavedChanges && this.currentNote) {
-        this.saveNote(true); // true = auto-save
-      }
-    }, 500);
   }
 
   /**
    * Save the current note
-   * @param {boolean} isAutoSave - Whether this is an auto-save
    */
-  async saveNote(isAutoSave = false) {
+  async saveNote() {
     const titleInput = document.getElementById('note-title');
     const contentTextarea = document.getElementById('note-content');
     const noteProjectSelect = document.getElementById('note-project');
@@ -483,12 +470,7 @@ export class NotesComponent {
         this.currentNote = result.data;
         this.hasUnsavedChanges = false;
         this.updateSaveButton();
-        
-        if (!isAutoSave) {
-          this.showSuccess('Note saved successfully');
-        }
-
-        // Reload notes list
+        this.showSaveAnimation();
         await this.loadNotes();
       } else {
         this.showError('Failed to save note: ' + result.error);
@@ -496,6 +478,24 @@ export class NotesComponent {
     } catch (error) {
       this.showError('Error saving note: ' + error.message);
     }
+  }
+
+  /**
+   * Show save animation on the save button
+   */
+  showSaveAnimation() {
+    const saveBtn = document.getElementById('save-note-btn');
+    if (!saveBtn) return;
+
+    // Add spinner class
+    saveBtn.classList.add('saving');
+    saveBtn.innerHTML = '<span class="save-spinner"></span> Saving';
+
+    // Remove after 2 seconds
+    setTimeout(() => {
+      saveBtn.classList.remove('saving');
+      saveBtn.textContent = 'Save';
+    }, 2000);
   }
 
   /**
@@ -531,7 +531,7 @@ export class NotesComponent {
   /**
    * Toggle between edit and preview mode
    */
-  togglePreview() {
+  async togglePreview() {
     this.isEditing = !this.isEditing;
 
     const contentTextarea = document.getElementById('note-content');
@@ -541,21 +541,26 @@ export class NotesComponent {
     if (!contentTextarea || !previewDiv || !toggleBtn) return;
 
     if (this.isEditing) {
+      // Switching to preview - save changes first if needed
+      if (this.hasUnsavedChanges) {
+        await this.saveNote();
+      }
+
       // Show preview
       const content = contentTextarea.value;
       previewDiv.innerHTML = markdownService.render(content, this.currentNote?.id);
-      
+
       contentTextarea.style.display = 'none';
       previewDiv.style.display = 'block';
       toggleBtn.textContent = 'Edit';
 
       // Validate internal links and style broken ones
       const { broken } = markdownService.validateInternalLinks(content, this.notes);
-      
+
       // Add click handler for internal links and mark broken ones
       previewDiv.querySelectorAll('a[href^="internal://"]').forEach(link => {
         const title = decodeURIComponent(link.getAttribute('href').replace('internal://', ''));
-        
+
         // Mark broken links
         if (broken.includes(title)) {
           link.classList.add('broken-link');
@@ -563,7 +568,7 @@ export class NotesComponent {
         } else {
           link.classList.add('internal-link');
         }
-        
+
         link.addEventListener('click', (e) => {
           e.preventDefault();
           this.navigateToNoteByTitle(title);
@@ -574,6 +579,7 @@ export class NotesComponent {
       contentTextarea.style.display = 'block';
       previewDiv.style.display = 'none';
       toggleBtn.textContent = 'Preview';
+      contentTextarea.focus();
     }
   }
 
@@ -676,10 +682,6 @@ export class NotesComponent {
    * Destroy the component
    */
   destroy() {
-    if (this.autoSaveTimer) {
-      clearTimeout(this.autoSaveTimer);
-    }
-    
     if (this.container) {
       this.container.innerHTML = '';
     }
