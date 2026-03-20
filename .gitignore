@@ -9,6 +9,7 @@ node_modules/
 # Build output
 dist/
 dist-electron/
+dist-cli/
 build/
 out/
 release/
@@ -29,6 +30,7 @@ pnpm-debug.log*
 coverage/
 playwright-report/
 tests/e2e/playwright-report/
+.tui-test/*
 
 # IDE
 .vscode/
