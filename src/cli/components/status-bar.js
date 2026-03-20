@@ -14,7 +14,10 @@ import { Box, Text } from 'ink';
  * @param {string} props.feedbackType - 'success' or 'error'
  */
 export function StatusBar({ section = '', itemCount = 0, shortcuts = [], feedback = '', feedbackType = '' }) {
-  const shortcutText = shortcuts.map(s => `${s.key}:${s.description}`).join('  ');
+  const contextText = shortcuts.map(s => `${s.key}:${s.description}`).join('  ');
+  const shortcutText = contextText
+    ? `${contextText}  ?:Help  q:Quit`
+    : '?:Help  q:Quit';
 
   return (
     React.createElement(Box, {
@@ -32,7 +35,7 @@ export function StatusBar({ section = '', itemCount = 0, shortcuts = [], feedbac
         }, feedback),
       ),
       React.createElement(Box, null,
-        React.createElement(Text, { dimColor: true }, shortcutText || '?:Help  Ctrl+Q:Quit'),
+        React.createElement(Text, { dimColor: true }, shortcutText),
       ),
     )
   );

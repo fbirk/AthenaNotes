@@ -9,6 +9,7 @@ import { homedir } from 'node:os';
 import { App } from './app.js';
 import { SetupWizard } from './components/setup-wizard.js';
 import { initializeServices } from './services/kb-service.js';
+import { setInkInstance, cleanExit } from './lib/exit.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,11 +23,18 @@ const cli = meow(`
     --help         Show this help
     --version      Show version
 
+  Keybindings
+    1-7            Switch between tabs
+    Tab/Shift+Tab  Cycle tabs
+    ?              Toggle help overlay
+    q / Ctrl+C     Quit the application
+
   Examples
     $ knowledgebase
     $ knowledgebase --storage ~/my-knowledge-base
 `, {
   importMeta: import.meta,
+  version: process.env.KB_VERSION || '0.0.0-dev',
   flags: {
     storage: {
       type: 'string',
@@ -102,6 +110,9 @@ export function saveCliConfig(storagePath) {
   fs.writeFileSync(cliConfigPath, JSON.stringify(data, null, 2), 'utf-8');
 }
 
+// Handle Ctrl+C at the process level (SIGINT)
+process.on('SIGINT', () => cleanExit(0));
+
 async function main() {
   const storagePath = resolveStoragePath();
 
@@ -109,26 +120,26 @@ async function main() {
     // Initialize services and launch main app
     try {
       await initializeServices(storagePath);
-      render(React.createElement(App));
+      setInkInstance(render(React.createElement(App), { exitOnCtrlC: false }));
     } catch (error) {
       console.error('Failed to initialize:', error.message);
       process.exit(1);
     }
   } else {
     // Launch setup wizard
-    render(React.createElement(SetupWizard, {
+    setInkInstance(render(React.createElement(SetupWizard, {
       onComplete: async (selectedPath) => {
         try {
           saveCliConfig(selectedPath);
           await initializeServices(selectedPath);
           // Re-render with main app
-          render(React.createElement(App));
+          setInkInstance(render(React.createElement(App), { exitOnCtrlC: false }));
         } catch (error) {
           console.error('Failed to initialize:', error.message);
           process.exit(1);
         }
       },
-    }));
+    }), { exitOnCtrlC: false }));
   }
 }
 

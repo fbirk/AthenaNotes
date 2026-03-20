@@ -76,6 +76,17 @@ export function SnippetsTab({ isActive, keyboard, onShortcutsChange, onItemCount
 
   const snippetsList = snippets || [];
 
+  // Auto-load first snippet when list first arrives
+  useEffect(() => {
+    if (snippetsList.length > 0 && !selectedSnippet && mode === 'list') {
+      kb.getSnippet(snippetsList[0].id).then(result => {
+        if (result.success) {
+          setSelectedSnippet(result.data);
+        }
+      });
+    }
+  }, [snippetsList.length]); // intentionally only triggers on list length change
+
   // Report shortcuts on mount
   useEffect(() => {
     onShortcutsChange?.(SHORTCUTS);
@@ -454,6 +465,7 @@ export function SnippetsTab({ isActive, keyboard, onShortcutsChange, onItemCount
     id: s.id,
     label: s.title,
     meta: s.language,
+    metaColor: 'cyan',
   }));
 
   // Build detail panel content

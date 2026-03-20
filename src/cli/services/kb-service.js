@@ -56,7 +56,7 @@ export async function listNotes({ projectId, sortBy = 'modifiedAt', sortOrder = 
       const project = projects.find(p => p.id === projectId);
       if (project) projectFolder = project.name;
     }
-    const notes = await fileService.listNotes(projectFolder);
+    const notes = await fileService.listNotes(projectFolder || undefined);
 
     // Sort
     notes.sort((a, b) => {

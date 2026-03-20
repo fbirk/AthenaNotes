@@ -13,7 +13,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "cli": "node src/cli/index.js",
-    "cli:dev": "node --watch src/cli/index.js"
+    "cli:dev": "node src/cli/index.js",
+    "build:cli": "node scripts/build-cli.mjs"
   },
   "bin": {
     "knowledgebase": "src/cli/index.js"
@@ -87,8 +88,10 @@
     "conventional-changelog-conventionalcommits": "^9.1.0",
     "electron": "^39.2.7",
     "electron-builder": "^26.4.0",
+    "esbuild": "^0.27.4",
     "eslint": "^9.39.2",
     "happy-dom": "^20.1.0",
+    "postject": "^1.0.0-alpha.6",
     "semantic-release": "^25.0.2",
     "vite": "^7.3.1",
     "vite-plugin-electron": "^0.29.0",

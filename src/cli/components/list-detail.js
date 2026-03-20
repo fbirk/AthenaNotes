@@ -8,7 +8,7 @@ import { Box, Text, useInput, useStdout } from 'ink';
 
 /**
  * @param {Object} props
- * @param {Array<{id: string, label: string, meta?: string, highlight?: boolean, dimmed?: boolean}>} props.items - List items
+ * @param {Array<{id: string, label: string, meta?: string, metaColor?: string, highlight?: boolean, dimmed?: boolean}>} props.items - List items
  * @param {number} props.selectedIndex - Currently highlighted index
  * @param {Function} props.onSelect - Called with index when Enter pressed
  * @param {Function} props.onHighlight - Called with index when highlight changes
@@ -32,9 +32,13 @@ export function ListDetail({
   listWidth = 30,
 }) {
   const { stdout } = useStdout();
+  const termWidth = stdout?.columns || 120;
   const termHeight = stdout?.rows || 24;
   const visibleHeight = Math.max(termHeight - 6, 5); // Account for tab bar + status bar + borders
   const [scrollOffset, setScrollOffset] = useState(0);
+
+  // Calculate fixed column width for stable sidebar
+  const listCols = showDetail ? Math.floor(termWidth * listWidth / 100) : undefined;
 
   // Keep selected item in view
   useEffect(() => {
@@ -71,33 +75,63 @@ export function ListDetail({
   const showScrollUp = scrollOffset > 0;
   const showScrollDown = scrollOffset + visibleHeight < items.length;
 
+  // Truncate a string to fit within available columns
+  const maxLabelWidth = listCols ? Math.max(10, listCols - 4) : undefined; // 4 = paddingX(1*2) + prefix(2)
+  const truncate = (str) => {
+    if (!maxLabelWidth || str.length <= maxLabelWidth) return str;
+    return str.slice(0, maxLabelWidth - 1) + '\u2026';
+  };
+
   const listPanel = React.createElement(Box, {
     flexDirection: 'column',
-    width: showDetail ? `${listWidth}%` : '100%',
+    ...(listCols ? { width: listCols } : { width: '100%' }),
     borderStyle: 'single',
     borderRight: showDetail,
     paddingX: 1,
+    overflow: 'hidden',
   },
     items.length === 0
       ? React.createElement(Text, { dimColor: true }, emptyMessage)
       : React.createElement(React.Fragment, null,
-          showScrollUp && React.createElement(Text, { dimColor: true }, '  ▲ more'),
+          showScrollUp && React.createElement(Text, { dimColor: true }, '  \u25B2 more'),
           ...visibleItems.map((item, i) => {
             const actualIndex = scrollOffset + i;
             const isSelected = actualIndex === selectedIndex;
+            const prefix = isSelected ? '\u25B8 ' : '  ';
+            const baseColor = item.highlight ? 'green' : (item.dimmed ? 'gray' : undefined);
+
+            // When metaColor is set, render label and meta as separate Text elements
+            if (item.meta && item.metaColor) {
+              const labelPart = truncate(`${prefix}${item.label} `);
+              const metaPart = item.meta;
+              return React.createElement(Box, { key: item.id || actualIndex },
+                React.createElement(Text, {
+                  inverse: isSelected,
+                  bold: isSelected,
+                  color: baseColor,
+                  wrap: 'truncate-end',
+                }, labelPart),
+                React.createElement(Text, {
+                  inverse: isSelected,
+                  bold: true,
+                  color: item.metaColor,
+                }, metaPart),
+              );
+            }
+
+            const metaSuffix = item.meta ? ` ${item.meta}` : '';
+            const fullLabel = `${prefix}${item.label}${metaSuffix}`;
+            const displayLabel = truncate(fullLabel);
             return React.createElement(Box, { key: item.id || actualIndex },
               React.createElement(Text, {
                 inverse: isSelected,
                 bold: isSelected,
-                color: item.highlight ? 'green' : (item.dimmed ? 'gray' : undefined),
-              },
-                isSelected ? '▸ ' : '  ',
-                item.label,
-                item.meta ? React.createElement(Text, { dimColor: true }, ` ${item.meta}`) : null,
-              )
+                color: baseColor,
+                wrap: 'truncate-end',
+              }, displayLabel)
             );
           }),
-          showScrollDown && React.createElement(Text, { dimColor: true }, '  ▾ more'),
+          showScrollDown && React.createElement(Text, { dimColor: true }, '  \u25BE more'),
           React.createElement(Text, { dimColor: true },
             `${selectedIndex + 1}/${items.length}`
           ),

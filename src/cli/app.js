@@ -4,11 +4,12 @@
  * TabBar (top) | Content (center) | StatusBar (bottom)
  */
 import React, { useState, useCallback } from 'react';
-import { Box, Text, useApp, useStdout, useInput } from 'ink';
+import { Box, Text, useStdout, useInput } from 'ink';
 import { TabBar, TABS } from './components/tab-bar.js';
 import { StatusBar } from './components/status-bar.js';
 import { HelpOverlay } from './components/help-overlay.js';
 import { useKeyboard, getGlobalShortcuts } from './hooks/use-keyboard.js';
+import { cleanExit } from './lib/exit.js';
 
 // Tab component imports — placeholder until implemented
 import { NotesTab } from './components/notes-tab.js';
@@ -30,7 +31,6 @@ const TAB_COMPONENTS = [
 ];
 
 export function App() {
-  const { exit } = useApp();
   const { stdout } = useStdout();
   const [activeTab, setActiveTab] = useState(0);
   const [showHelp, setShowHelp] = useState(false);
@@ -61,8 +61,8 @@ export function App() {
   }, []);
 
   const handleQuit = useCallback(() => {
-    exit();
-  }, [exit]);
+    cleanExit(0);
+  }, []);
 
   const keyboard = useKeyboard({
     onTabSwitch: handleTabSwitch,

@@ -378,7 +378,7 @@ export function ProjectsTab({ isActive, keyboard, onShortcutsChange, onItemCount
       onHighlight: handleHighlight,
       onBack: handleBack,
       detail: detailContent,
-      showDetail: !!(selectedProject || isInputMode || mode === 'confirm-delete'),
+      showDetail: true,
       isActive: isActive && !isInputMode && mode !== 'confirm-delete',
       emptyMessage: projectsLoading ? 'Loading projects...' : 'No projects found',
       listWidth: 30,

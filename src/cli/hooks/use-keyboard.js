@@ -29,6 +29,16 @@ export function useKeyboard({ onTabSwitch, onHelp, onQuit, enabled = true }) {
   useInput((input, key) => {
     if (!enabled) return;
 
+    // Global: Ctrl+Q or Ctrl+C to quit (always works, even during text input)
+    if ((input === 'q' || input === 'c') && key.ctrl) {
+      if (onQuit) {
+        onQuit();
+      } else {
+        process.exit(0);
+      }
+      return;
+    }
+
     // When in text input mode, don't intercept normal characters
     if (inputMode === 'text') {
       if (key.escape) {
@@ -37,8 +47,8 @@ export function useKeyboard({ onTabSwitch, onHelp, onQuit, enabled = true }) {
       return;
     }
 
-    // Global: Ctrl+Q to quit
-    if (input === 'q' && key.ctrl) {
+    // Global: q to quit
+    if (input === 'q') {
       onQuit?.();
       return;
     }
@@ -81,6 +91,7 @@ export function getGlobalShortcuts() {
     { key: 'Tab', description: 'Next tab', section: 'Global' },
     { key: 'Shift+Tab', description: 'Previous tab', section: 'Global' },
     { key: '?', description: 'Toggle help', section: 'Global' },
-    { key: 'Ctrl+Q', description: 'Quit', section: 'Global' },
+    { key: 'q', description: 'Quit', section: 'Global' },
+    { key: 'Ctrl+C', description: 'Quit (always)', section: 'Global' },
   ];
 }

@@ -56,7 +56,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "npm run build:win"
+        "prepareCmd": "npm run build:win && npm run build:cli"
       }
     ],
     [
@@ -71,12 +71,16 @@
       {
         "assets": [
           {
-            "path": "release/*.exe",
+            "path": "release/AthenaNotes*.exe",
             "label": "Windows Installer (${nextRelease.version})"
           },
           {
             "path": "release/*.exe.blockmap",
             "label": "Windows Installer Blockmap"
+          },
+          {
+            "path": "release/knowledgebase-cli-win-x64.exe",
+            "label": "CLI Tool (${nextRelease.version})"
           }
         ],
         "successComment": false,
