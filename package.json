@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:tui": "npx @microsoft/tui-test",
     "cli": "node src/cli/index.js",
     "cli:dev": "node src/cli/index.js",
     "build:cli": "node scripts/build-cli.mjs"
@@ -80,6 +81,7 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
+    "@microsoft/tui-test": "^0.0.3",
     "@playwright/test": "^1.57.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/exec": "^7.1.0",

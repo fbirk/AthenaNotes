@@ -30,6 +30,7 @@ pnpm-debug.log*
 coverage/
 playwright-report/
 tests/e2e/playwright-report/
+.tui-test/*
 
 # IDE
 .vscode/
