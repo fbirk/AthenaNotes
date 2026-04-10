@@ -4,6 +4,7 @@ import { ProjectsComponent } from './components/projects.js';
 import { renderSnippetsComponent } from './components/snippets.js';
 import { renderRoadmapsComponent } from './components/roadmaps.js';
 import { renderToolsComponent } from './components/tools.js';
+import { renderShortcutsComponent } from './components/shortcuts.js';
 import { TodosSection } from './components/todos-section.js';
 import { DailyTodos } from './components/daily-todos.js';
 
@@ -42,6 +43,10 @@ const routes = new Map([
   }],
   ['#/tools', async (container) => {
     await renderToolsComponent(container);
+    return null;
+  }],
+  ['#/shortcuts', async (container) => {
+    await renderShortcutsComponent(container);
     return null;
   }],
   ['#/daily-todos', (container) => {
