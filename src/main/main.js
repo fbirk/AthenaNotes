@@ -204,6 +204,10 @@ async function setupIpcHandlers() {
   ipcMain.removeHandler('tools.update');
   ipcMain.removeHandler('tools.delete');
   ipcMain.removeHandler('tools.launch');
+  ipcMain.removeHandler('shortcuts.list');
+  ipcMain.removeHandler('shortcuts.create');
+  ipcMain.removeHandler('shortcuts.update');
+  ipcMain.removeHandler('shortcuts.delete');
   ipcMain.removeHandler('dailyTodos.list');
   ipcMain.removeHandler('dailyTodos.create');
   ipcMain.removeHandler('dailyTodos.toggleComplete');
