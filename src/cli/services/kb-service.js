@@ -513,6 +513,75 @@ export async function launchTool(toolId) {
   }
 }
 
+// ==================== Shortcuts ====================
+
+async function _readShortcuts() {
+  const data = await fileService.readJSON('shortcuts.json');
+  return data?.shortcuts || [];
+}
+
+async function _writeShortcuts(shortcuts) {
+  await fileService.writeJSON('shortcuts.json', { shortcuts });
+}
+
+export async function listShortcuts() {
+  try {
+    const shortcuts = await _readShortcuts();
+    shortcuts.sort((a, b) => {
+      if (a.program !== b.program) return a.program.localeCompare(b.program);
+      return a.description.localeCompare(b.description);
+    });
+    return wrapResult(shortcuts);
+  } catch (error) {
+    return wrapError(error);
+  }
+}
+
+export async function createShortcut({ program, shortcut, description }) {
+  try {
+    const shortcuts = await _readShortcuts();
+    const now = new Date().toISOString();
+    const entry = {
+      id: uuidv4(),
+      program: program.trim(),
+      shortcut: shortcut.trim(),
+      description: description.trim(),
+      createdAt: now,
+      modifiedAt: now,
+    };
+    shortcuts.push(entry);
+    await _writeShortcuts(shortcuts);
+    return wrapResult(entry);
+  } catch (error) {
+    return wrapError(error);
+  }
+}
+
+export async function updateShortcut({ id, updates }) {
+  try {
+    const shortcuts = await _readShortcuts();
+    const index = shortcuts.findIndex(s => s.id === id);
+    if (index === -1) return { success: false, error: 'Shortcut not found' };
+    shortcuts[index] = { ...shortcuts[index], ...updates, modifiedAt: new Date().toISOString() };
+    await _writeShortcuts(shortcuts);
+    return wrapResult(shortcuts[index]);
+  } catch (error) {
+    return wrapError(error);
+  }
+}
+
+export async function deleteShortcut(shortcutId) {
+  try {
+    const shortcuts = await _readShortcuts();
+    const filtered = shortcuts.filter(s => s.id !== shortcutId);
+    if (filtered.length === shortcuts.length) return { success: false, error: 'Shortcut not found' };
+    await _writeShortcuts(filtered);
+    return wrapResult(null);
+  } catch (error) {
+    return wrapError(error);
+  }
+}
+
 // ==================== Daily Todos ====================
 
 export async function listDailyTodos() {
