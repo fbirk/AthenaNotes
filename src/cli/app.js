@@ -19,6 +19,7 @@ import { ProjectsTab } from './components/projects-tab.js';
 import { SnippetsTab } from './components/snippets-tab.js';
 import { RoadmapsTab } from './components/roadmaps-tab.js';
 import { ToolsTab } from './components/tools-tab.js';
+import { ShortcutsTab } from './components/shortcuts-tab.js';
 
 const TAB_COMPONENTS = [
   NotesTab,
@@ -28,6 +29,7 @@ const TAB_COMPONENTS = [
   SnippetsTab,
   RoadmapsTab,
   ToolsTab,
+  ShortcutsTab,
 ];
 
 export function App() {
