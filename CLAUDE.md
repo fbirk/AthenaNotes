@@ -45,6 +45,7 @@ Main Process (Node.js)              Renderer Process (Browser)
                                     │   ├── snippets.js
                                     │   ├── roadmaps.js
                                     │   ├── tools.js
+                                    │   ├── shortcuts.js
                                     │   └── setup.js
                                     └── styles/
                                         ├── main.css
@@ -75,6 +76,7 @@ All renderer-to-main communication uses `window.knowledgeBase.invoke(channel, pa
 - `snippets.*` - Snippets CRUD (list, get, create, update, delete, search)
 - `milestones.*` - Milestones CRUD (list, create, update, delete, toggleComplete)
 - `tools.*` - Tools CRUD (list, create, update, delete, launch)
+- `shortcuts.*` - Shortcuts CRUD (list, create, update, delete)
 - `fs.*` - File system dialogs (selectFolder, validatePath)
 - `app.getVersion` - Returns the application version
 
@@ -90,6 +92,7 @@ Hash-based routing in `router.js`. Routes:
 - `#/snippets` - Code snippets library
 - `#/roadmaps` - Project roadmaps/milestones
 - `#/tools` - Developer tools/links launcher
+- `#/shortcuts` - Keyboard shortcuts reference
 - `#/setup` - Initial storage setup
 
 ### Data Storage
@@ -104,7 +107,8 @@ User selects a storage folder on first run. Structure:
 │   ├── daily-todos-archive.json # Archived completed daily todos
 │   ├── projects.json            # Project metadata
 │   ├── milestones.json          # Project milestones/roadmap items
-│   └── tools.json               # Developer tools/links
+│   ├── tools.json               # Developer tools/links
+│   └── shortcuts.json           # Keyboard shortcuts for external programs
 ├── notes/                       # Markdown files with YAML frontmatter
 │   ├── *.md                     # Root-level notes
 │   └── <project-folder>/        # Project-specific notes

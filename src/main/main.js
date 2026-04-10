@@ -204,6 +204,10 @@ async function setupIpcHandlers() {
   ipcMain.removeHandler('tools.update');
   ipcMain.removeHandler('tools.delete');
   ipcMain.removeHandler('tools.launch');
+  ipcMain.removeHandler('shortcuts.list');
+  ipcMain.removeHandler('shortcuts.create');
+  ipcMain.removeHandler('shortcuts.update');
+  ipcMain.removeHandler('shortcuts.delete');
   ipcMain.removeHandler('dailyTodos.list');
   ipcMain.removeHandler('dailyTodos.create');
   ipcMain.removeHandler('dailyTodos.toggleComplete');
@@ -1039,6 +1043,103 @@ async function setupIpcHandlers() {
       }
 
       return { success: true, data: { launched: true } };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  // ==================== Shortcuts API ====================
+  ipcMain.handle('shortcuts.list', async () => {
+    try {
+      const data = await fileService.readJSON('shortcuts.json');
+      const shortcuts = data?.shortcuts || [];
+
+      shortcuts.sort((a, b) => {
+        if (a.program !== b.program) return a.program.localeCompare(b.program);
+        return a.description.localeCompare(b.description);
+      });
+
+      return { success: true, data: shortcuts };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('shortcuts.create', async (_event, shortcutData) => {
+    try {
+      if (!shortcutData.program?.trim() || !shortcutData.shortcut?.trim() || !shortcutData.description?.trim()) {
+        return { success: false, error: 'VALIDATION_ERROR: program, shortcut, and description are required' };
+      }
+
+      const data = await fileService.readJSON('shortcuts.json') || { shortcuts: [] };
+      if (!data.shortcuts) data.shortcuts = [];
+      const now = new Date().toISOString();
+
+      const newShortcut = {
+        id: fileService.generateId(),
+        program: shortcutData.program.trim(),
+        shortcut: shortcutData.shortcut.trim(),
+        description: shortcutData.description.trim(),
+        createdAt: now,
+        modifiedAt: now,
+      };
+
+      data.shortcuts.push(newShortcut);
+      await fileService.writeJSON('shortcuts.json', data);
+
+      return { success: true, data: newShortcut };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('shortcuts.update', async (_event, { id, updates }) => {
+    try {
+      const data = await fileService.readJSON('shortcuts.json');
+      if (!data || !data.shortcuts) {
+        return { success: false, error: 'SHORTCUT_NOT_FOUND' };
+      }
+
+      const index = data.shortcuts.findIndex(s => s.id === id);
+      if (index === -1) {
+        return { success: false, error: 'SHORTCUT_NOT_FOUND' };
+      }
+
+      const allowed = {};
+      if (updates.program !== undefined) allowed.program = updates.program.trim();
+      if (updates.shortcut !== undefined) allowed.shortcut = updates.shortcut.trim();
+      if (updates.description !== undefined) allowed.description = updates.description.trim();
+
+      data.shortcuts[index] = {
+        ...data.shortcuts[index],
+        ...allowed,
+        modifiedAt: new Date().toISOString(),
+      };
+
+      await fileService.writeJSON('shortcuts.json', data);
+
+      return { success: true, data: data.shortcuts[index] };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('shortcuts.delete', async (_event, id) => {
+    try {
+      const data = await fileService.readJSON('shortcuts.json');
+      if (!data || !data.shortcuts) {
+        return { success: false, error: 'SHORTCUT_NOT_FOUND' };
+      }
+
+      const index = data.shortcuts.findIndex(s => s.id === id);
+      if (index === -1) {
+        return { success: false, error: 'SHORTCUT_NOT_FOUND' };
+      }
+
+      data.shortcuts.splice(index, 1);
+      await fileService.writeJSON('shortcuts.json', data);
+
+      return { success: true, data: { deleted: true } };
     } catch (error) {
       return { success: false, error: error.message };
     }

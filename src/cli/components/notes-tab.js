@@ -533,15 +533,17 @@ export function NotesTab({ isActive, keyboard, onShortcutsChange, onItemCountCha
     );
   } else if (selectedNote && mode === 'preview') {
     const projectName = getProjectName(selectedNote.projectId);
-    detailContent = React.createElement(Box, { flexDirection: 'column', paddingX: 1 },
-      React.createElement(Box, { marginBottom: 1, flexDirection: 'column' },
+    detailContent = React.createElement(Box, { flexDirection: 'column', flexGrow: 1, overflow: 'hidden', paddingX: 1 },
+      React.createElement(Box, { marginBottom: 1, flexDirection: 'column', flexShrink: 0 },
         React.createElement(Text, { bold: true }, selectedNote.title),
         projectName && React.createElement(Text, { color: 'cyan', dimColor: true }, `Project: ${projectName}`),
         React.createElement(Text, { dimColor: true },
           `Modified: ${new Date(selectedNote.modifiedAt).toLocaleString()}`
         ),
       ),
-      React.createElement(MarkdownPreview, { markdown: selectedNote.content || '' }),
+      React.createElement(Box, { flexGrow: 1, overflow: 'hidden' },
+        React.createElement(MarkdownPreview, { markdown: selectedNote.content || '' }),
+      ),
     );
   } else {
     detailContent = React.createElement(Box, { paddingX: 1, paddingY: 1 },

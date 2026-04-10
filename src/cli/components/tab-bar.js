@@ -1,6 +1,6 @@
 /**
  * TabBar Component
- * Renders a horizontal tab bar with 7 tabs.
+ * Renders a horizontal tab bar with 8 tabs.
  * Active tab is highlighted. Supports number key and Tab/Shift+Tab switching.
  */
 import React from 'react';
@@ -14,6 +14,7 @@ const TABS = [
   { label: 'Snippets', key: '5' },
   { label: 'Roadmaps', key: '6' },
   { label: 'Tools', key: '7' },
+  { label: 'Shortcuts', key: '8' },
 ];
 
 export { TABS };
