@@ -142,6 +142,7 @@ export function ListDetail({
     flexDirection: 'column',
     flexGrow: 1,
     paddingX: 1,
+    overflow: 'hidden',
   }, detail || React.createElement(Text, { dimColor: true }, 'Select an item to view details'));
 
   return React.createElement(Box, { flexGrow: 1, flexDirection: 'row' },
