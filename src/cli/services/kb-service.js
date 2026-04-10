@@ -539,6 +539,9 @@ export async function listShortcuts() {
 
 export async function createShortcut({ program, shortcut, description }) {
   try {
+    if (!program?.trim() || !shortcut?.trim() || !description?.trim()) {
+      return { success: false, error: 'program, shortcut, and description are required' };
+    }
     const shortcuts = await _readShortcuts();
     const now = new Date().toISOString();
     const entry = {
@@ -562,7 +565,11 @@ export async function updateShortcut({ id, updates }) {
     const shortcuts = await _readShortcuts();
     const index = shortcuts.findIndex(s => s.id === id);
     if (index === -1) return { success: false, error: 'Shortcut not found' };
-    shortcuts[index] = { ...shortcuts[index], ...updates, modifiedAt: new Date().toISOString() };
+    const allowed = {};
+    if (updates.program !== undefined) allowed.program = updates.program.trim();
+    if (updates.shortcut !== undefined) allowed.shortcut = updates.shortcut.trim();
+    if (updates.description !== undefined) allowed.description = updates.description.trim();
+    shortcuts[index] = { ...shortcuts[index], ...allowed, modifiedAt: new Date().toISOString() };
     await _writeShortcuts(shortcuts);
     return wrapResult(shortcuts[index]);
   } catch (error) {
