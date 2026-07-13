@@ -9,12 +9,13 @@ import { useInput } from 'ink';
 
 /**
  * @param {Object} options
- * @param {Function} options.onTabSwitch - Called with tab index (0-6) when 1-7 pressed
+ * @param {Function} options.onTabSwitch - Called with tab index when a number key is pressed
  * @param {Function} options.onHelp - Called when ? pressed
  * @param {Function} options.onQuit - Called when Ctrl+Q pressed
  * @param {boolean} options.enabled - Whether keyboard input is enabled (default: true)
+ * @param {number} options.tabCount - Number of tabs reachable via number keys (default: 9)
  */
-export function useKeyboard({ onTabSwitch, onHelp, onQuit, enabled = true }) {
+export function useKeyboard({ onTabSwitch, onHelp, onQuit, enabled = true, tabCount = 9 }) {
   const contextHandlersRef = useRef(new Map());
   const [inputMode, setInputMode] = useState(null); // null = normal, 'text' = text input active
 
@@ -59,9 +60,10 @@ export function useKeyboard({ onTabSwitch, onHelp, onQuit, enabled = true }) {
       return;
     }
 
-    // Global: number keys 1-7 for tab switching
+    // Global: number keys 1-9 for tab switching (bounded by the number of tabs)
+    const maxNumberKey = Math.min(tabCount, 9);
     const num = parseInt(input, 10);
-    if (num >= 1 && num <= 7 && !key.ctrl && !key.meta) {
+    if (num >= 1 && num <= maxNumberKey && !key.ctrl && !key.meta) {
       onTabSwitch?.(num - 1);
       return;
     }
@@ -84,10 +86,12 @@ export function useKeyboard({ onTabSwitch, onHelp, onQuit, enabled = true }) {
 
 /**
  * Get the list of global keyboard shortcuts for display
+ * @param {number} tabCount - Number of tabs reachable via number keys (default: 8)
  */
-export function getGlobalShortcuts() {
+export function getGlobalShortcuts(tabCount = 8) {
+  const maxNumberKey = Math.min(tabCount, 9);
   return [
-    { key: '1-7', description: 'Switch tab', section: 'Global' },
+    { key: `1-${maxNumberKey}`, description: 'Switch tab', section: 'Global' },
     { key: 'Tab', description: 'Next tab', section: 'Global' },
     { key: 'Shift+Tab', description: 'Previous tab', section: 'Global' },
     { key: '?', description: 'Toggle help', section: 'Global' },

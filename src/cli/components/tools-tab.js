@@ -176,6 +176,12 @@ export function ToolsTab({ isActive, keyboard, onShortcutsChange, onItemCountCha
     }
   }, [mode, showDeleteConfirm, keyboard]);
 
+  // Escape cancels the active create/edit form. This runs independently of the
+  // global keyboard hook, so the tab isn't left stuck in a form.
+  useInput((input, key) => {
+    if (key.escape) handleBack();
+  }, { isActive: isActive && (mode === 'creating' || mode === 'editing') });
+
   // Cycle category filter
   const handleCycleFilter = useCallback(() => {
     if (categories.length === 0) {

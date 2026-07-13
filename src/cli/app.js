@@ -71,6 +71,7 @@ export function App() {
     onHelp: handleHelp,
     onQuit: handleQuit,
     enabled: !showHelp,
+    tabCount: TABS.length,
   });
 
   // Tab/Shift+Tab cycling (handled separately from useKeyboard since it uses key object)
@@ -112,7 +113,7 @@ export function App() {
   };
 
   const helpShortcuts = [
-    ...getGlobalShortcuts(),
+    ...getGlobalShortcuts(TABS.length),
     ...tabShortcuts.map(s => ({ ...s, section: TABS[activeTab]?.label })),
   ];
 
