@@ -24,7 +24,7 @@ const cli = meow(`
     --version      Show version
 
   Keybindings
-    1-7            Switch between tabs
+    1-8            Switch between tabs
     Tab/Shift+Tab  Cycle tabs
     ?              Toggle help overlay
     q / Ctrl+C     Quit the application

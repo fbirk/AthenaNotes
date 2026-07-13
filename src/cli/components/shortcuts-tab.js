@@ -169,6 +169,13 @@ export function ShortcutsTab({ isActive, keyboard, onShortcutsChange, onItemCoun
     }
   }, [mode, showDeleteConfirm, keyboard]);
 
+  // Escape cancels the active form/search. This runs independently of the
+  // global keyboard hook (which only clears its own input-mode flag), so the
+  // tab isn't left stuck in a form the user can never leave.
+  useInput((input, key) => {
+    if (key.escape) handleBack();
+  }, { isActive: isActive && (mode === 'creating' || mode === 'editing' || mode === 'searching') });
+
   // Search flow
   const handleSearchStart = useCallback(() => {
     setMode('searching');

@@ -419,6 +419,13 @@ export function RoadmapsTab({ isActive, keyboard, onShortcutsChange, onItemCount
     }
   }, { isActive: isActive && mode === 'view' });
 
+  // Escape cancels the active create/edit form. This runs independently of the
+  // global keyboard hook, so the tab isn't left stuck in a form. The delete
+  // confirmation handles its own escape via ConfirmDialog.
+  useInput((input, key) => {
+    if (key.escape) handleBack();
+  }, { isActive: isActive && mode !== 'view' && mode !== 'confirm-delete' });
+
   // Register keyboard context
   useEffect(() => {
     if (!keyboard || !isActive) return;

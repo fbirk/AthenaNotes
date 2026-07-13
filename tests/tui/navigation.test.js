@@ -75,6 +75,10 @@ test.describe('Tab navigation', () => {
     // Press 4 -> Projects (shows project names)
     terminal.keyPress('4');
     await expect(terminal.getByText('TestProject', { strict: false })).toBeVisible();
+
+    // Press 8 -> Shortcuts (there are 8 tabs; the number key must reach the last)
+    terminal.keyPress('8');
+    await expect(terminal.getByText('Keyboard Shortcuts', { strict: false })).toBeVisible();
   });
 });
 

@@ -39,6 +39,10 @@ const SEED_DATA = {
   config: { theme: 'dark', createdAt: '2026-01-01T00:00:00.000Z' },
   milestones: [],
   tools: [],
+  shortcuts: [
+    { id: 'sc-001', program: 'VSCode', shortcut: 'Ctrl+P', description: 'Quick open file' },
+    { id: 'sc-002', program: 'VSCode', shortcut: 'Ctrl+Shift+P', description: 'Command palette' },
+  ],
 };
 
 const NOTE_ONE = `---
@@ -95,6 +99,7 @@ function writeSeedData(storagePath) {
   fs.writeFileSync(path.join(kbDir, 'config.json'), JSON.stringify(SEED_DATA.config, null, 2), 'utf-8');
   fs.writeFileSync(path.join(kbDir, 'milestones.json'), JSON.stringify({ milestones: SEED_DATA.milestones }, null, 2), 'utf-8');
   fs.writeFileSync(path.join(kbDir, 'tools.json'), JSON.stringify({ tools: SEED_DATA.tools }, null, 2), 'utf-8');
+  fs.writeFileSync(path.join(kbDir, 'shortcuts.json'), JSON.stringify({ shortcuts: SEED_DATA.shortcuts }, null, 2), 'utf-8');
 
   // Write note files
   fs.writeFileSync(path.join(notesDir, 'test-note-one.md'), NOTE_ONE, 'utf-8');

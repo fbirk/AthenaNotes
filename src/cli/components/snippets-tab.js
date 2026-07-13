@@ -172,6 +172,16 @@ export function SnippetsTab({ isActive, keyboard, onShortcutsChange, onItemCount
     }
   }, [mode, selectedSnippet, showDeleteConfirm, keyboard]);
 
+  // Escape cancels the active search/filter/create/edit form. This runs
+  // independently of the global keyboard hook, so the tab isn't left stuck in a
+  // form. The delete confirmation handles its own escape via ConfirmDialog.
+  useInput((input, key) => {
+    if (key.escape) handleBack();
+  }, {
+    isActive: isActive && !showDeleteConfirm
+      && (mode === 'search' || mode === 'filter-input' || mode === 'creating' || mode === 'editing'),
+  });
+
   // Search mode handlers
   const handleSearchStart = useCallback(() => {
     setMode('search');
