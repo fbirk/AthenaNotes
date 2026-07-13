@@ -1,6 +1,6 @@
 {
   "name": "developer-knowledge-base",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Personal knowledge base desktop app for developers",
   "type": "module",
   "main": "dist-electron/main.js",
@@ -94,7 +94,7 @@
     "eslint": "^9.39.2",
     "happy-dom": "^20.1.0",
     "postject": "^1.0.0-alpha.6",
-    "semantic-release": "^25.0.3",
+    "semantic-release": "^25.0.7",
     "vite": "^7.3.1",
     "vite-plugin-electron": "^0.29.0",
     "vite-plugin-electron-renderer": "^0.14.6",

@@ -5,6 +5,19 @@ All notable changes to AthenaNotes will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1](https://github.com/fbirk/AthenaNotes/compare/v1.1.0...v1.1.1) (2026-07-13)
+
+### Bug Fixes
+
+* **cli:** escape cancels forms in context-driven tabs; number key 8 switches tabs ([762113d](https://github.com/fbirk/AthenaNotes/commit/762113dcc6fb31877c4608c579247b4920840b67))
+
+# Changelog
+
+All notable changes to AthenaNotes will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
 ## [1.1.0](https://github.com/fbirk/AthenaNotes/compare/v1.0.0...v1.1.0) (2026-04-10)
 
 ### Features
